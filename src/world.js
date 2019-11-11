@@ -112,7 +112,7 @@ export default class World {
                 if (didAddItem) {
                     // add a line to the cargo manifest in the HTML document
                     const itemListingElement = document.createElement('p')
-                    const itemText = `Added to Inventory: ${randomItem.name}: ${randomItem.volume} liters - ${randomItem.weight}kg - $${randomItem.value} - ${randomItem.rarity} rarity`
+                    const itemText = `Added to Inventory: ${randomItem.name} made by ${randomItem.madeBy}: ${randomItem.volume} liters - ${randomItem.weight}kg - $${randomItem.value} - ${randomItem.rarity} rarity`
                     itemListingElement.textContent = itemText
                     manifestDiv.appendChild(itemListingElement)
                 } else {
