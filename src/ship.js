@@ -86,10 +86,9 @@ export default class Ship {
             new Point(0, 0),
             this.position
         )
-        this.speed = 1
+        this.speed = 0
 
-        this.destinations = []
-        this.currentDestinationIndex = 0
+        this.currentDestination = null
 
         this.shape = [
             {
@@ -148,40 +147,34 @@ export default class Ship {
             return false
         }
     }
-
-    addDestination(location) {
-        this.destinations.push(location)
-        if (this.destinations.length === 1) {
-            this.path = new Vector(
-                this.position,
-                location.position
-            )
-        }
+    reachedDestination() {
+        this.speed = 0
     }
-    nextDestination() {
-        this.currentDestinationIndex += 1
-        if (this.currentDestinationIndex >= this.destinations.length) {
-            this.currentDestinationIndex = 0
-        }
+    setDestination(destination) {
+        this.currentDestination = destination
+        this.speed = 1
         this.path = new Vector(
             this.position,
-            this.destinations[this.currentDestinationIndex].position
+            destination.position
         )
     }
     update() {
-        const velocity = this.path.normalize().multiply(this.speed)
-        this.position = this.position.translate(velocity)
-        this.angle = referenceVector.angleTo(this.path)
+        if (this.currentDestination) {
+            const velocity = this.path.normalize().multiply(this.speed)
+            this.position = this.position.translate(velocity)
+            this.angle = referenceVector.angleTo(this.path)
 
-        const destination = this.destinations[this.currentDestinationIndex]
-        if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
-            this.nextDestination()
+            // const destination = this.destinations[this.currentDestinationIndex]
+            const destination = this.currentDestination
+            if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
+                this.reachedDestination()
+            }
+
+            this.view.position({
+                x: this.position.x,
+                y: this.position.y
+            })
+            this.view.rotation(radiansToDegrees(this.angle) + 90)
         }
-
-        this.view.position({
-            x: this.position.x,
-            y: this.position.y
-        })
-        this.view.rotation(radiansToDegrees(this.angle) + 90)
     }
 }
