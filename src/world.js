@@ -30,8 +30,19 @@ class Location {
             text: this.name
         })
 
+        this.onSelectListeners = []
+
         this.view.add(this.rect)
         this.view.add(this.text)
+        this.view.on('mouseenter', () => {
+            this.rect.fill('yellow')
+        })
+        this.view.on('click', () => {
+            this.onSelectListeners.forEach(listener => listener())
+        })
+        this.view.on('mouseleave', () => {
+            this.rect.fill('green')
+        })
     }
 
     getView() {
@@ -41,6 +52,10 @@ class Location {
     getItemValue(item) {
         // calculates the item's value at this location
         // returns it
+    }
+
+    selected(cb) {
+        this.onSelectListeners.push(cb)
     }
 }
 
@@ -73,7 +88,9 @@ export default class World {
         this.locations = locationData
         this.ship = new Ship({ x: 0, y: 0 })
         this.locations.forEach(location => {
-            this.ship.addDestination(location)
+            location.selected(() => {
+                this.ship.setDestination(location)
+            })
         })
 
         this.view = new Konva.Group({
