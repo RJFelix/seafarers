@@ -10,28 +10,6 @@ const referenceVector = new Vector(
 
 const degreesToRadians = degrees => degrees * (Math.PI / 180)
 const radiansToDegrees = radians => radians * (180 / Math.PI)
-
-class shipInventory {
-    constructor ( { compartmentArray, componentArray} ) {
-
-    }
-}
-
-class Item {
-    constructor ( { itemCharacteristics } ) {
-    }
-        
-
-    create() {
-
-    }
-    itemCreator( {Item, Creator} ) {
-        if (Item.characteristic.rarity == 0) {
-            
-        }
-    }
-}
-
 const randomInt = (min, max) => min + Math.floor(Math.random() * max)
 
 const createProducerFromTemplate = (producerTemplate) => {
@@ -69,7 +47,8 @@ const createRandomItemValues = (itemName, producerName) => {
 
 const createItemFromTemplate = (itemTemplate, producerTemplate) => {
     const randomItem = createRandomItemValues(itemTemplate.name, producerTemplate.name)
-    const randomProducer = createRandomProducerValues(producerTemplate.name, ProducerTemplate.produce)
+    //const randomProducer = createRandomProducerValues(producerTemplate.name, ProducerTemplate.produce)
+    
     // ...object "spreads" an object's entries (key-value pairs)
     // newObject = { ...oldObject } therefore takes all of the entries in oldObject and duplicates them in newObject,
     //   i.e. creates a clone of oldObject
@@ -85,7 +64,8 @@ export const createRandomItem = () => {
     const producerTemplateIndex = randomInt(0, producerTemplates.length)
     const itemTemplate = itemTemplates[itemTemplateIndex]
     const producerTemplate = producerTemplates[producerTemplateIndex]
-    const randomItem = createItemFromTemplate(itemTemplate, producerTemplate)
+    const randomProducer = createProducerFromTemplate(producerTemplate)
+    const randomItem = createItemFromTemplate(itemTemplate, randomProducer)
     return randomItem
 }
 
@@ -125,7 +105,7 @@ export default class Ship {
         })
 
         this.cargo = []
-        this.cargoHoldVolume = cargoHoldVolume || 30
+        this.cargoHoldVolume = cargoHoldVolume || 3000
     }
     getView() {
         return this.view

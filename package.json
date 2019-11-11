@@ -26,6 +26,7 @@
   },
   "dependencies": {
     "@flatten-js/core": "^1.0.18",
-    "konva": "^4.0.17"
+    "konva": "^4.0.17",
+    "resolve-cwd": "^3.0.0"
   }
 }

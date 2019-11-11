@@ -1,7 +1,7 @@
 import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
 
-import Ship, { createRandomItem } from './ship.js'
+import Ship, { createRandomItem, createRandomProducer } from './ship.js'
 
 class Location {
     constructor( { name, x, y } ) {
