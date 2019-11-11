@@ -1,6 +1,6 @@
 export default [
     {
-        name: 'Bag of Tea',
+        name: 'Chest of Tea',
         weight: 50
     },
     {

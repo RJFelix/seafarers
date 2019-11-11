@@ -10,10 +10,6 @@ const referenceVector = new Vector(
 const degreesToRadians = degrees => degrees * (Math.PI / 180)
 const radiansToDegrees = radians => radians * (180 / Math.PI)
 
-class shipAttributes {
-
-}
-
 class shipInventory {
     constructor ( { compartmentArray, componentArray} ) {
 
@@ -35,30 +31,22 @@ class Item {
     }
 }
 
-let bagOfTea = {
-    weight: 50,
-    stackSize: 7,
-    value: 100,
-    rarity: 0
-}
-
 const randomInt = (min, max) => min + Math.floor(Math.random() * max)
 
 const createRandomItemValues = (name) => {
-    const weightVal = randomInt(10, 100)
-    const volumeVal = randomInt(1, 10)
-    const valueVal = randomInt(10, 5000)
-    const rarityVal = randomInt(0, 10)
+    const weight = randomInt(10, 100)
+    const volume = randomInt(1, 10)
+    const value = randomInt(10, 5000)
+    const rarity = randomInt(0, 10)
     const item = {
-        weight: weightVal,
-        volume: volumeVal,
-        value: valueVal,
-        rarity: rarityVal,
+        weight,
+        volume,
+        value,
+        rarity,
         name: name || ''
     }
     return item
 }
-
 
 const createItemFromTemplate = (itemTemplate) => {
     const randomItem = createRandomItemValues(itemTemplate.name)
