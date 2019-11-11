@@ -1,13 +1,7 @@
 import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
 
-const referenceVector = new Vector(
-    new Point(0, 0),
-    new Point(0, -1)
-)
-
-const degreesToRadians = degrees => degrees * (Math.PI / 180)
-const radiansToDegrees = radians => radians * (180 / Math.PI)
+import Ship, { createRandomItem } from './ship.js'
 
 class Location {
     constructor( { name, x, y } ) {
@@ -60,84 +54,13 @@ const locationData = [
         name: 'Alexandria',
         x: 241,
         y: 197
+    }),
+    new Location({
+        name: 'Shanghai',
+        x: 400,
+        y: 400
     })
 ]
-
-class Ship {
-    constructor({ x, y }) {
-        this.position = new Point(x, y)
-        this.path = new Vector(
-            new Point(0, 0),
-            this.position
-        )
-        this.speed = 1
-
-        this.destinations = []
-        this.currentDestinationIndex = 0
-
-        this.shape = [
-            {
-                x: 0,
-                y: 0,
-            },
-            {
-                x: -5,
-                y: 15,
-            },
-            {
-                x: 5,
-                y: 15,
-            }
-        ]
-        this.view = new Konva.Rect({
-            x: 0,
-            y: 0,
-            width: 30,
-            height: 10,
-            offsetX: 15,
-            offsetY: 5,
-            fill: 'red'
-        })
-    }
-    getView() {
-        return this.view
-    }
-    addDestination(location) {
-        this.destinations.push(location)
-        if (this.destinations.length === 1) {
-            this.path = new Vector(
-                this.position,
-                location.position
-            )
-        }
-    }
-    nextDestination() {
-        this.currentDestinationIndex += 1
-        if (this.currentDestinationIndex >= this.destinations.length) {
-            this.currentDestinationIndex = 0
-        }
-        this.path = new Vector(
-            this.position,
-            this.destinations[this.currentDestinationIndex].position
-        )
-    }
-    update() {
-        const velocity = this.path.normalize().multiply(this.speed)
-        this.position = this.position.translate(velocity)
-        this.angle = referenceVector.angleTo(this.path)
-
-        const destination = this.destinations[this.currentDestinationIndex]
-        if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
-            this.nextDestination()
-        }
-
-        this.view.position({
-            x: this.position.x,
-            y: this.position.y
-        })
-        this.view.rotation(radiansToDegrees(this.angle) + 90)
-    }
-}
 
 export default class World {
     constructor() {
@@ -158,6 +81,23 @@ export default class World {
         })
 
         this.view.add(this.ship.getView())
+
+        const manifestDiv = document.getElementById('shipManifest')
+        window.addEventListener('keypress', evt => {
+            if (evt.key === 'a') {
+                const randomItem = createRandomItem('Cargo')
+                const didAddItem = this.ship.addCargo(randomItem)
+                if (didAddItem) {
+                    // add a line to the cargo manifest in the HTML document
+                    const itemListingElement = document.createElement('p')
+                    const itemText = `${randomItem.name} - ${randomItem.volume} m3 - ${randomItem.weight} kg - ${randomItem.value} doubloons - ${randomItem.rarity} rarity`
+                    itemListingElement.textContent = itemText
+                    manifestDiv.appendChild(itemListingElement)
+                } else {
+                    alert('Cargo hold full!')
+                }
+            }
+        })
     }
     getView() {
         return this.view

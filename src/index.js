@@ -1,5 +1,6 @@
 import Konva from 'konva'
 import World from './world.js'
+import { createRandomItem } from './ship.js'
 
 document.addEventListener('DOMContentLoaded', () => {
 
@@ -7,8 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const stage = new Konva.Stage({
         container: 'container',
-        width: 1000,
-        height: 1000
+        width: 500,
+        height: 500
     })
 
     const layer = new Konva.Layer()
