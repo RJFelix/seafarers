@@ -37,6 +37,11 @@ class Location {
     getView() {
         return this.view
     }
+
+    getItemValue(item) {
+        // calculates the item's value at this location
+        // returns it
+    }
 }
 
 const locationData = [

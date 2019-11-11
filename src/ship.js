@@ -1,5 +1,6 @@
 import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
+import itemTemplates from './item-templates.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
@@ -43,7 +44,7 @@ let bagOfTea = {
 
 const randomInt = (min, max) => min + Math.floor(Math.random() * max)
 
-export const createRandomItem = (name) => {
+const createRandomItemValues = (name) => {
     const weightVal = randomInt(10, 100)
     const volumeVal = randomInt(1, 10)
     const valueVal = randomInt(10, 5000)
@@ -53,9 +54,29 @@ export const createRandomItem = (name) => {
         volume: volumeVal,
         value: valueVal,
         rarity: rarityVal,
-        name: name
+        name: name || ''
     }
     return item
+}
+
+
+const createItemFromTemplate = (itemTemplate) => {
+    const randomItem = createRandomItemValues(itemTemplate.name)
+    // ...object "spreads" an object's entries (key-value pairs)
+    // newObject = { ...oldObject } therefore takes all of the entries in oldObject and duplicates them in newObject,
+    //   i.e. creates a clone of oldObject
+    // newObject = { ...oldObject, ...anotherObject } - "spreads" from left to right, so first duplicate all the entries in oldObject
+    //   into newObject, then duplicate all the entries in anotherObject into newObject, replacing any existing entries (from oldObject)
+    //   that share the same key.
+    const item = { ...randomItem, ...itemTemplate }
+    return item
+}
+
+export const createRandomItem = () => {
+    const itemTemplateIndex = randomInt(0, itemTemplates.length)
+    const itemTemplate = itemTemplates[itemTemplateIndex]
+    const randomItem = createItemFromTemplate(itemTemplate)
+    return randomItem
 }
 
 export default class Ship {
