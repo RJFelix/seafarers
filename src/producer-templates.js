@@ -20,6 +20,6 @@ export default [
         produce: 'beans',
         itemId: 2,
         quantity: 4,
-        skill: 4
+        skill: 5
     }
 ]

@@ -1,18 +1,19 @@
-import { randomInt } from './utils.js'
+import { randomInt, normalDistribution } from './utils.js'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 
 export const createItemFromProducer = (producer) => {
   const itemTemplate = itemTemplates[producer.itemId]
   const item = createItemFromTemplate(itemTemplate, producer)
-  
-  const roll = randomInt(0, 10)
-  if (itemTemplate.hasRarity && roll < producer.skill) {
-      item.rarity += 2.5
+
+  if (itemTemplate.hasRarity) {
+    const roll = normalDistribution(1, 100, 1)
+    item.rarity = producer.skill * (roll/50)
+    item.rarity = Math.round(item.rarity)
   }
 
   return item
-} 
+}
 
 const createProducerFromTemplate = (producerTemplate) => {
   const randomProducer = createRandomProducerValues(producerTemplate.name, producerTemplate.produce)
@@ -35,7 +36,7 @@ const createRandomItemValues = (itemName, producerName) => {
   const weight = randomInt(1, 100)
   const volume = randomInt(1, 1000)
   const value = randomInt(1, 1000)
-  const rarity = randomInt(0, 10)
+  const rarity = randomInt(0, 2)
   const item = {
       weight,
       volume,
