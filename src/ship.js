@@ -3,7 +3,7 @@ import { Point, Vector, Line, Segment } from '@flatten-js/core'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 import { randomInt } from './utils.js'
-import { createItemFromProducer, createRandomItem } from './item.js'
+import Item, { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
@@ -82,15 +82,6 @@ export default class Ship {
         return this.view
     }
 
-    /*
-    const item = {
-        weight: weightVal,
-        volume: volumeVal,
-        value: valueVal,
-        rarity: rarityVal,
-        name: name,
-    }
-    */
     addCargo(item) {
         // Check to make sure there's room
         //   If the sum of this.cargo's volume properties + item.volume <= this.cargoHoldItem => there's room
@@ -108,6 +99,13 @@ export default class Ship {
             return false
         }
     }
+    sellCargo(indexID) {
+        this.cargo.splice(indexID, 1)
+        const payment = new Item(itemTemplates[3])
+        const paymentItem = createItemFromProducer(payment)
+        this.addCargo(paymentItem)
+    }
+
     reachedDestination() {
         this.location = this.currentDestination
         this.location.refillMarket()
@@ -133,10 +131,36 @@ export default class Ship {
             itemEl.appendChild(itemBuyButton)
             locationInfoEl.appendChild(itemEl)
         })
-        
+
         this.currentDestination = null
         this.speed = 0
     }
+
+    openShipInventory() {
+
+        const shipInventoryEl = document.getElementById('shipInventory')
+        removeAllChildren(shipInventoryEl)
+
+        this.cargo.forEach((item, idx) => {
+            const itemEl = document.createElement('div')
+            const itemDescriptionEl = document.createElement('p')
+            itemDescriptionEl.innerText = `${item.name} made by ${item.madeby}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemEl.appendChild(itemDescriptionEl)
+            const itemSellButton = document.createElement('button')
+            itemSellButton.innerText = 'Sell'
+            itemSellButton.addEventListener('click', (evt) => {
+                if (this.sellCargo(idx)) {
+                    this.cargo.splice(idx, 1)
+                    shipInventoryEl.removeChild(itemEl)
+                } else {
+                    alert('Cannot sell; cargo hold empty!')
+                }
+            })
+            itemEl.appendChild(itemSellButton)
+            shipInventoryEl.appendChild(itemEl)
+        })
+    }
+
     setDestination(destination) {
         this.location = null
         const locationInfoEl = document.getElementById('locationInfo')
@@ -165,6 +189,7 @@ export default class Ship {
                 y: this.position.y
             })
             this.view.rotation(radiansToDegrees(this.angle) + 90)
+            this.openShipInventory()
         }
     }
 }

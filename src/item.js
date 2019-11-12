@@ -2,6 +2,17 @@ import { randomInt, normalDistribution } from './utils.js'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 
+export default class Item {
+  constructor( { name, weight, volume, value, rarity, madeBy } ) {
+      this.name = name
+      this.weight = weight
+      this.volume = volume
+      this.value = value
+      this.rarity = rarity
+      this.madeBy = madeBy
+  }
+}
+
 export const createItemFromProducer = (producer) => {
   const itemTemplate = itemTemplates[producer.itemId]
   const item = createItemFromTemplate(itemTemplate, producer)
@@ -24,7 +35,7 @@ const createProducerFromTemplate = (producerTemplate) => {
 const createRandomProducerValues = (name, produce) => {
   const quantity = randomInt(1, 10)
   const skill = randomInt(1, 10)
-  const prodcer = {
+  const producer = {
       quantity,
       skill,
       produce: produce || 'Generic Item',
@@ -48,7 +59,7 @@ const createRandomItemValues = (itemName, producerName) => {
   return item
 }
 
-const createItemFromTemplate = (itemTemplate, producerTemplate) => {
+export const createItemFromTemplate = (itemTemplate, producerTemplate) => {
   const randomItem = createRandomItemValues(itemTemplate.name, producerTemplate.name)
   //const randomProducer = createRandomProducerValues(producerTemplate.name, ProducerTemplate.produce)
   
