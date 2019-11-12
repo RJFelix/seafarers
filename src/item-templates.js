@@ -1,14 +1,24 @@
 export default [
     {
-        name: 'Chest of Tea',
-        weight: 50
+        template: {
+            name: 'Chest of Tea',
+            weight: 50,
+        },
+        hasRarity: true
     },
     {
-        name: 'Cannonball',
-        weight: 300
+        template: {
+            name: 'Cannonball',
+            weight: 300,
+            volume: 50,
+        },
+        hasRarity: false
     },
     {
-        name: 'Linen',
-        weight: 100
+        template: {
+            name: 'Linen',
+            weight: 100,
+        },
+        hasRarity: true
     }
 ]

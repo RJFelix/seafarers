@@ -2,6 +2,8 @@ import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
+import { randomInt } from './utils.js'
+import { createItemFromProducer, createRandomItem } from './item.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
@@ -10,63 +12,13 @@ const referenceVector = new Vector(
 
 const degreesToRadians = degrees => degrees * (Math.PI / 180)
 const radiansToDegrees = radians => radians * (180 / Math.PI)
-const randomInt = (min, max) => min + Math.floor(Math.random() * max)
 
-const createProducerFromTemplate = (producerTemplate) => {
-    const randomProducer = createRandomProducerValues(producerTemplate.name, producerTemplate.produce)
-    const producer = { ...randomProducer, ...producerTemplate }
-    return producer
-}
-
-const createRandomProducerValues = (name, produce) => {
-    const quantity = randomInt(1, 10)
-    const skill = randomInt(1, 10)
-    const prodcer = {
-        quantity,
-        skill,
-        produce: produce || 'Generic Item',
-        name: name || 'Generic Supplier'
-    }
-}
-
-const createRandomItemValues = (itemName, producerName) => {
-    const weight = randomInt(1, 100)
-    const volume = randomInt(1, 1000)
-    const value = randomInt(1, 1000)
-    const rarity = randomInt(0, 10)
-    const item = {
-        weight,
-        volume,
-        value,
-        rarity,
-        name: itemName || 'Generic Item',
-        madeBy: producerName || 'Generic Supplier'
-    }
-    return item
-}
-
-const createItemFromTemplate = (itemTemplate, producerTemplate) => {
-    const randomItem = createRandomItemValues(itemTemplate.name, producerTemplate.name)
-    //const randomProducer = createRandomProducerValues(producerTemplate.name, ProducerTemplate.produce)
-    
-    // ...object "spreads" an object's entries (key-value pairs)
-    // newObject = { ...oldObject } therefore takes all of the entries in oldObject and duplicates them in newObject,
-    //   i.e. creates a clone of oldObject
-    // newObject = { ...oldObject, ...anotherObject } - "spreads" from left to right, so first duplicate all the entries in oldObject
-    //   into newObject, then duplicate all the entries in anotherObject into newObject, replacing any existing entries (from oldObject)
-    //   that share the same key.
-    const item = { ...randomItem, ...itemTemplate }
-    return item
-}
-
-export const createRandomItem = () => {
-    const itemTemplateIndex = randomInt(0, itemTemplates.length)
-    const producerTemplateIndex = randomInt(0, producerTemplates.length)
-    const itemTemplate = itemTemplates[itemTemplateIndex]
-    const producerTemplate = producerTemplates[producerTemplateIndex]
-    const randomProducer = createProducerFromTemplate(producerTemplate)
-    const randomItem = createItemFromTemplate(itemTemplate, randomProducer)
-    return randomItem
+const removeAllChildren = (element) => {
+    if (element) {
+        while (element.firstChild) {
+            element.removeChild(element.firstChild)
+        }
+    }   
 }
 
 export default class Ship {
@@ -106,6 +58,25 @@ export default class Ship {
 
         this.cargo = []
         this.cargoHoldVolume = cargoHoldVolume || 3000
+
+        const manifestDiv = document.getElementById('shipManifest')
+        document.addEventListener('keypress', (event) => {
+            if (event.key === 's') {
+                if (this.location && this.location.producer) {
+                    const itemFromLocation = createItemFromProducer(this.location.producer)
+                    const didAddItem = this.addCargo(itemFromLocation)
+                    if (didAddItem) {
+                        // add a line to the cargo manifest in the HTML document
+                        const itemListingElement = document.createElement('p')
+                        const itemText = `Bought from ${this.location.name}: ${itemFromLocation.name} made by ${itemFromLocation.madeBy}: ${itemFromLocation.volume} liters - ${itemFromLocation.weight}kg - $${itemFromLocation.value} - ${itemFromLocation.rarity} rarity`
+                        itemListingElement.textContent = itemText
+                        manifestDiv.appendChild(itemListingElement)
+                    } else {
+                        alert('Cargo hold full!')
+                    }
+                }
+            }
+        })
     }
     getView() {
         return this.view
@@ -138,9 +109,38 @@ export default class Ship {
         }
     }
     reachedDestination() {
+        this.location = this.currentDestination
+        this.location.refillMarket()
+
+        const locationInfoEl = document.getElementById('locationInfo')
+        removeAllChildren(locationInfoEl)
+
+        this.location.market.forEach((item, idx) => {
+            const itemEl = document.createElement('div')
+            const itemDescriptionEl = document.createElement('p')
+            itemDescriptionEl.innerText = `${item.name} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemEl.appendChild(itemDescriptionEl)
+            const itemBuyButton = document.createElement('button')
+            itemBuyButton.innerText = 'Buy'
+            itemBuyButton.addEventListener('click', (evt) => {
+                if (this.addCargo(item)) {
+                    this.location.market.splice(idx, 1)
+                    locationInfoEl.removeChild(itemEl)
+                } else {
+                    alert('Cannot buy; cargo hold full!')
+                }
+            })
+            itemEl.appendChild(itemBuyButton)
+            locationInfoEl.appendChild(itemEl)
+        })
+        
+        this.currentDestination = null
         this.speed = 0
     }
     setDestination(destination) {
+        this.location = null
+        const locationInfoEl = document.getElementById('locationInfo')
+        removeAllChildren(locationInfoEl)
         this.currentDestination = destination
         this.speed = 1
         this.path = new Vector(
