@@ -20,5 +20,14 @@ export default [
             weight: 100,
         },
         hasRarity: true
+    },
+    {
+        template: {
+            name: 'Doubloon',
+            weight: 1,
+            volume: 1,
+            value: 1,
+        },
+        hasRarity: false
     }
 ]

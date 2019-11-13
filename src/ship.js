@@ -3,7 +3,7 @@ import { Point, Vector, Line, Segment } from '@flatten-js/core'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 import { randomInt } from './utils.js'
-import Item, { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
+import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
@@ -57,7 +57,7 @@ export default class Ship {
         })
 
         this.cargo = []
-        this.cargoHoldVolume = cargoHoldVolume || 3000
+        this.cargoHoldVolume = cargoHoldVolume || 300000
 
         const manifestDiv = document.getElementById('shipManifest')
         document.addEventListener('keypress', (event) => {
@@ -100,10 +100,15 @@ export default class Ship {
         }
     }
     sellCargo(indexID) {
-        this.cargo.splice(indexID, 1)
-        const payment = new Item(itemTemplates[3])
-        const paymentItem = createItemFromProducer(payment)
-        this.addCargo(paymentItem)
+        if (this.cargo[indexID] != undefined) {
+            this.cargo.splice(indexID, 1)
+            const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
+            this.addCargo(payment)
+            console.log("sold at sellCargo")
+            return true
+        }
+        console.log("returned false")
+        return false
     }
 
     reachedDestination() {
@@ -116,7 +121,7 @@ export default class Ship {
         this.location.market.forEach((item, idx) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.name} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
             itemEl.appendChild(itemDescriptionEl)
             const itemBuyButton = document.createElement('button')
             itemBuyButton.innerText = 'Buy'
@@ -144,17 +149,19 @@ export default class Ship {
         this.cargo.forEach((item, idx) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.name} made by ${item.madeby}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
             itemEl.appendChild(itemDescriptionEl)
             const itemSellButton = document.createElement('button')
             itemSellButton.innerText = 'Sell'
             itemSellButton.addEventListener('click', (evt) => {
+                console.log("sell button pressed")
                 if (this.sellCargo(idx)) {
-                    this.cargo.splice(idx, 1)
                     shipInventoryEl.removeChild(itemEl)
+                    console.log("item listing removed")
                 } else {
                     alert('Cannot sell; cargo hold empty!')
                 }
+                console.log("Action Complete, Inventory:", this.cargo)
             })
             itemEl.appendChild(itemSellButton)
             shipInventoryEl.appendChild(itemEl)
