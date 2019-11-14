@@ -48,11 +48,13 @@ const createRandomItemValues = (itemName, producerName) => {
   const volume = randomInt(1, 1000)
   const value = randomInt(1, 1000)
   const rarity = randomInt(0, 2)
+  const quantity = 1
   const item = {
       weight,
       volume,
       value,
       rarity,
+      quantity,
       name: itemName || 'Generic Item',
       madeBy: producerName || 'Generic Supplier'
   }

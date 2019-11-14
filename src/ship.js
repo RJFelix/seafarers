@@ -2,7 +2,7 @@ import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
-import { randomInt } from './utils.js'
+import { randomInt, groupBy } from './utils.js'
 import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
 
 const referenceVector = new Vector(
@@ -57,7 +57,7 @@ export default class Ship {
         })
 
         this.cargo = []
-        this.cargoHoldVolume = cargoHoldVolume || 300000
+        this.cargoHoldVolume = cargoHoldVolume || 300
 
         const manifestDiv = document.getElementById('shipManifest')
         document.addEventListener('keypress', (event) => {
@@ -168,6 +168,11 @@ export default class Ship {
         })
     }
 
+    groupShipInventory() {
+        const sortedStuff = groupBy(this.cargo, itemTemplates.template.name)
+        console.log(sortedStuff)
+    }
+
     setDestination(destination) {
         this.location = null
         const locationInfoEl = document.getElementById('locationInfo')
@@ -196,7 +201,11 @@ export default class Ship {
                 y: this.position.y
             })
             this.view.rotation(radiansToDegrees(this.angle) + 90)
-            this.openShipInventory()
+            // // this.groupShipInventory()
+            // console.log(this.cargo.weight)
+            // // console.log(Object.values(this.cargo))
+            // // console.log(this.cargo.find("Cannonball"))
+            // this.openShipInventory()
         }
     }
 }
