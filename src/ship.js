@@ -129,6 +129,7 @@ export default class Ship {
                 if (this.addCargo(item)) {
                     this.location.market.splice(idx, 1)
                     locationInfoEl.removeChild(itemEl)
+                    this.openShipInventory()
                 } else {
                     alert('Cannot buy; cargo hold full!')
                 }
@@ -154,14 +155,13 @@ export default class Ship {
             const itemSellButton = document.createElement('button')
             itemSellButton.innerText = 'Sell'
             itemSellButton.addEventListener('click', (evt) => {
-                console.log("sell button pressed")
                 if (this.sellCargo(idx)) {
                     shipInventoryEl.removeChild(itemEl)
-                    console.log("item listing removed")
-                } else {
+                    this.openShipInventory()
+                }
+                else {
                     alert('Cannot sell; cargo hold empty!')
                 }
-                console.log("Action Complete, Inventory:", this.cargo)
             })
             itemEl.appendChild(itemSellButton)
             shipInventoryEl.appendChild(itemEl)
