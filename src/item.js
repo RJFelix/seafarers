@@ -1,3 +1,5 @@
+import uuid from 'uuid/v4'
+
 import { randomInt, normalDistribution } from './utils.js'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
@@ -50,6 +52,7 @@ const createRandomItemValues = (itemName, producerName) => {
   const rarity = randomInt(0, 2)
   const quantity = 1
   const item = {
+      id: uuid(),
       weight,
       volume,
       value,

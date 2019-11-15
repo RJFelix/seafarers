@@ -1,5 +1,7 @@
 import Konva from 'konva'
 import { Point, Vector, Line, Segment } from '@flatten-js/core'
+import uuid from 'uuid/v4'
+
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 import { randomInt, groupBy } from './utils.js'
@@ -57,7 +59,7 @@ export default class Ship {
         })
 
         this.cargo = []
-        this.cargoHoldVolume = cargoHoldVolume || 300
+        this.cargoHoldVolume = cargoHoldVolume || 30000
 
         const manifestDiv = document.getElementById('shipManifest')
         document.addEventListener('keypress', (event) => {
@@ -93,21 +95,21 @@ export default class Ship {
         if (volumeWithNewItem <= this.cargoHoldVolume) {
             // If there's room, add it to this ship's cargo and return true
             this.cargo.push(item)
+            this.groupShipInventory()
             return true
         } else {
             // If not, return false
             return false
         }
     }
-    sellCargo(indexID) {
-        if (this.cargo[indexID] != undefined) {
-            this.cargo.splice(indexID, 1)
+    sellCargo(item) {
+        const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
+        if (index > -1) {
+            this.cargo.splice(index, 1)
             const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
             this.addCargo(payment)
-            console.log("sold at sellCargo")
             return true
         }
-        console.log("returned false")
         return false
     }
 
@@ -118,7 +120,7 @@ export default class Ship {
         const locationInfoEl = document.getElementById('locationInfo')
         removeAllChildren(locationInfoEl)
 
-        this.location.market.forEach((item, idx) => {
+        this.location.market.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
             itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
@@ -127,9 +129,9 @@ export default class Ship {
             itemBuyButton.innerText = 'Buy'
             itemBuyButton.addEventListener('click', (evt) => {
                 if (this.addCargo(item)) {
-                    this.location.market.splice(idx, 1)
+                    const index = this.location.market.findIndex((marketItem) => marketItem.id === item.id)
+                    this.location.market.splice(index, 1)
                     locationInfoEl.removeChild(itemEl)
-                    this.openShipInventory()
                 } else {
                     alert('Cannot buy; cargo hold full!')
                 }
@@ -147,19 +149,15 @@ export default class Ship {
         const shipInventoryEl = document.getElementById('shipInventory')
         removeAllChildren(shipInventoryEl)
 
-        this.cargo.forEach((item, idx) => {
+        this.cargo.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
             itemEl.appendChild(itemDescriptionEl)
             const itemSellButton = document.createElement('button')
             itemSellButton.innerText = 'Sell'
             itemSellButton.addEventListener('click', (evt) => {
-                if (this.sellCargo(idx)) {
-                    shipInventoryEl.removeChild(itemEl)
-                    this.openShipInventory()
-                }
-                else {
+                if (!this.sellCargo(item)) {
                     alert('Cannot sell; cargo hold empty!')
                 }
             })
@@ -169,8 +167,44 @@ export default class Ship {
     }
 
     groupShipInventory() {
-        const sortedStuff = groupBy(this.cargo, itemTemplates.template.name)
-        console.log(sortedStuff)
+        // We are assuming that the two items here are already valid items
+        // combineItems should take two items, and return the combination of the two
+        const combineItems = (alreadyCombinedItem, newItem) => {
+            // We have to consider the case of alreadyCombinedItem = null
+            if (!alreadyCombinedItem) {
+                if (Array.isArray(newItem.madeBy)) {
+                    return newItem
+                }
+                const item = {
+                    ...newItem,
+                    madeBy: [newItem.madeBy]
+                }
+                return item
+            }
+            let madeBy = []
+            if (Array.isArray(alreadyCombinedItem.madeBy)) {
+                madeBy = [newItem.madeBy].concat(alreadyCombinedItem.madeBy)
+            } else {
+                madeBy = [alreadyCombinedItem.madeBy, newItem.madeBy]
+            }
+            // Trick to shallow de-duplicate an array
+            const madeBySet = new Set(madeBy)
+            madeBy = Array.from(madeBySet)
+            
+            const item = {
+                id: uuid(),
+                weight: alreadyCombinedItem.weight + newItem.weight,
+                volume: alreadyCombinedItem.volume + newItem.volume,
+                value: alreadyCombinedItem.value + newItem.value,
+                rarity: newItem.rarity,
+                quantity: alreadyCombinedItem.quantity + newItem.quantity,
+                name: newItem.name,
+                madeBy
+            }
+            return item
+        }
+        this.cargo = groupBy(this.cargo, ["name", "rarity"], combineItems)
+        this.openShipInventory()
     }
 
     setDestination(destination) {
@@ -184,6 +218,7 @@ export default class Ship {
             destination.position
         )
     }
+
     update() {
         if (this.currentDestination) {
             const velocity = this.path.normalize().multiply(this.speed)
@@ -201,11 +236,6 @@ export default class Ship {
                 y: this.position.y
             })
             this.view.rotation(radiansToDegrees(this.angle) + 90)
-            // // this.groupShipInventory()
-            // console.log(this.cargo.weight)
-            // // console.log(Object.values(this.cargo))
-            // // console.log(this.cargo.find("Cannonball"))
-            // this.openShipInventory()
         }
     }
 }
