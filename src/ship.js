@@ -4,7 +4,7 @@ import uuid from 'uuid/v4'
 
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
-import { randomInt, groupBy } from './utils.js'
+import { groupBy } from './utils.js'
 import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
 
 const referenceVector = new Vector(
@@ -150,7 +150,7 @@ export default class Ship {
         this.location.market.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} m3`
+            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${(Math.round(item.weight*100))/100} kg - ${(Math.round(item.volume*100))/100} m3`
             itemEl.appendChild(itemDescriptionEl)
             const itemBuyButton = document.createElement('button')
             itemBuyButton.innerText = 'Buy'
@@ -179,7 +179,7 @@ export default class Ship {
         this.cargo.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} m3`
+            itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${(Math.round(item.weight*100))/100} kg - ${(Math.round(item.volume*100))/100} m3`
             itemEl.appendChild(itemDescriptionEl)
             const itemSellButton = document.createElement('button')
             itemSellButton.innerText = 'Sell'

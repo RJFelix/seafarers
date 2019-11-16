@@ -31,5 +31,12 @@ export default [
             value: 1,
         },
         hasRarity: false
+    },
+    {
+        template: {
+            name: 'Bushel of Wheat',
+            weight: 27.2155, // real weight
+            volume: .036369 // real volume
+        }
     }
 ]

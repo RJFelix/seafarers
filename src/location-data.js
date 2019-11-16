@@ -17,7 +17,8 @@ export default [
     new Location({
         name: 'Alexandria',
         x: 241,
-        y: 197
+        y: 197,
+        producer: producers[4]
     }),
     new Location({
         name: 'Shanghai',

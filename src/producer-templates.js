@@ -3,30 +3,33 @@ import itemTemplates from './item-templates.js'
 export default [
     {
         name: 'Shanghai General Supplier',
-        produce: `${itemTemplates.name}`,
-        itemId: 0,
+        itemId: 0, //'Chest of Tea'
         quantity: 2,
         skill: 3
     },
     {
         name: 'Naples General Supplier',
-        produce: 'coffee',
-        itemId: 1,
+        itemId: 1, //'Cannonball'
         quantity: 3,
         skill: 3
     },
     {
         name: 'Venice General Supplier',
-        produce: 'beans',
-        itemId: 2,
+        itemId: 2, //'Linen'
         quantity: 4,
         skill: 5
     },
     {
-        name: 'Mint',
-        produce: 'Doubloons',
-        itemId: 3,
+        name: 'Royal Mint of Spain',
+        itemId: 3, //'Doubloon'
         quantity: 100,
         skill: 5
+    },
+    {
+        name: 'Alexandria General Supplier',
+        itemId: 4, //'Wheat'
+        quantity: 15,
+        skill: 1
     }
+
 ]
