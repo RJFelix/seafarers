@@ -61,6 +61,11 @@ export default class Ship {
         this.cargo = []
         this.cargoHoldVolume = cargoHoldVolume || 30000
 
+        // Currently, the cargo hold can pack items in perfectly with no wasted space at all between items
+        // as if it were melting items down into a liquid and storing them in a tank. Doubloons, for instance,
+        // are coins that waste space in the real world due to their cylindrical shape. But the cargo hold
+        // saves that space.
+
         const manifestDiv = document.getElementById('shipManifest')
         document.addEventListener('keypress', (event) => {
             if (event.key === 's') {
@@ -70,7 +75,7 @@ export default class Ship {
                     if (didAddItem) {
                         // add a line to the cargo manifest in the HTML document
                         const itemListingElement = document.createElement('p')
-                        const itemText = `Bought from ${this.location.name}: ${itemFromLocation.name} made by ${itemFromLocation.madeBy}: ${itemFromLocation.volume} liters - ${itemFromLocation.weight}kg - $${itemFromLocation.value} - ${itemFromLocation.rarity} rarity`
+                        const itemText = `Bought from ${this.location.name}: ${itemFromLocation.name} made by ${itemFromLocation.madeBy}: ${itemFromLocation.volume} m3 - ${itemFromLocation.weight}kg - $${itemFromLocation.value} - ${itemFromLocation.rarity} rarity`
                         itemListingElement.textContent = itemText
                         manifestDiv.appendChild(itemListingElement)
                     } else {
@@ -102,15 +107,37 @@ export default class Ship {
             return false
         }
     }
+    // OLD SELL CARGO FUNCTION:
+    // sellCargo(item) {
+    //     const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
+    //     if (index > -1) {
+    //         this.cargo.splice(index, 1)
+    //         const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
+    //         this.addCargo(payment)
+    //         return true
+    //     }
+    //     return false
+    // }
     sellCargo(item) {
         const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
         if (index > -1) {
+            const payment = this.getPaymentFromValue(item.value)
             this.cargo.splice(index, 1)
-            const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
             this.addCargo(payment)
             return true
         }
         return false
+    }
+
+    getPaymentFromValue(value) {
+        const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
+
+        payment.weight *= value
+        payment.volume *= value
+        payment.value *= value
+        payment.quantity *= value
+
+        return payment
     }
 
     reachedDestination() {
@@ -123,7 +150,7 @@ export default class Ship {
         this.location.market.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} m3`
             itemEl.appendChild(itemDescriptionEl)
             const itemBuyButton = document.createElement('button')
             itemBuyButton.innerText = 'Buy'
@@ -152,7 +179,7 @@ export default class Ship {
         this.cargo.forEach((item) => {
             const itemEl = document.createElement('div')
             const itemDescriptionEl = document.createElement('p')
-            itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} liters`
+            itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${item.weight} kg - ${item.volume} m3`
             itemEl.appendChild(itemDescriptionEl)
             const itemSellButton = document.createElement('button')
             itemSellButton.innerText = 'Sell'

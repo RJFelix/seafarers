@@ -24,8 +24,8 @@ export default [
     {
         template: {
             name: 'Doubloon',
-            weight: 1,
-            volume: 1,
+            weight: 0.006867, // 6.867g real weight of a doubloon.
+            volume: 0.00000158114, // 1581 m3 real volume of a doubloon.
             value: 1,
         },
         hasRarity: false
