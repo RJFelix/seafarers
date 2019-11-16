@@ -159,3 +159,13 @@ export const groupBy = (items, keys, combine) => {
 //   { name: 'Apple', price: 3.48 },
 //   { name: 'Banana', price: 0.99 } 
 // ]
+
+export function factorialize(num) {
+  if (num < 0) 
+        return -1;
+  else if (num == 0) 
+      return 1;
+  else {
+      return (num * factorialize(num - 1));
+  }
+}

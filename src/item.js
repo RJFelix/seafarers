@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4'
-import { randomInt, normalDistribution } from './utils.js'
+import { randomInt, normalDistribution, factorialize } from './utils.js'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 
@@ -22,6 +22,7 @@ export const createItemFromProducer = (producer) => {
     const roll = normalDistribution(1, 100, 1)
     item.rarity = producer.skill * (roll/50)
     item.rarity = Math.round(item.rarity)
+    item.value = item.baseValue*(factorialize(item.rarity))
   }
 
   return item
@@ -48,13 +49,15 @@ const createRandomItemValues = (itemName, producerName) => {
   const weight = randomInt(1, 100)
   const volume = randomInt(1, 1000)
   const value = randomInt(1, 1000)
-  const rarity = randomInt(0, 2)
+  const baseValue = randomInt(1, 1000)
+  const rarity = randomInt(1, 2)
   const quantity = 1
   const item = {
       id: uuid(),
       weight,
       volume,
       value,
+      baseValue,
       rarity,
       quantity,
       name: itemName || 'Generic Item',
@@ -76,6 +79,8 @@ export const createItemFromTemplate = (itemTemplate, producerTemplate) => {
   const item = { ...randomItem, ...itemTemplate.template }
   if (!itemTemplate.hasRarity) {
     item.rarity = 1
+  }  else {
+    item.value = item.baseValue*item.rarity
   }
   return item
 }

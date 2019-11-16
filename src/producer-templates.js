@@ -6,7 +6,7 @@ export default [
         produce: `${itemTemplates.name}`,
         itemId: 0,
         quantity: 2,
-        skill: 2
+        skill: 3
     },
     {
         name: 'Naples General Supplier',

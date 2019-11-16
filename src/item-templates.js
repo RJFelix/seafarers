@@ -3,6 +3,8 @@ export default [
         template: {
             name: 'Chest of Tea',
             weight: 50,
+            volume: 1,
+            baseValue: 10
         },
         hasRarity: true
     },
