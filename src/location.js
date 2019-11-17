@@ -1,6 +1,7 @@
 import Konva from 'konva'
 import { Point } from '@flatten-js/core'
-import { createItemFromProducer } from './item.js'
+import { createItemFromProducer, combineItems } from './item.js'
+import { groupBy } from './utils.js'
 import uuid from 'uuid/v4'
 
 export default class Location {
@@ -17,24 +18,28 @@ export default class Location {
   }
 
   onClick() {
-    console.log(`Click location ${this.name}`)
     this.onSelectListeners.forEach(listener => listener())
-  }
-
-  getView() {
-      return this.view
   }
 
   refillMarket() {
     if (this.producer) {
       const newItems = new Array(5).fill(0).map(() => createItemFromProducer(this.producer))
-      this.market = this.market.concat(newItems)
+      this.market = groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems)
     }
   }
 
   getItemValue(item) {
       // calculates the item's value at this location
       // returns it
+  }
+
+  buyItem(item) {
+      const itemIndex = this.market.findIndex(marketItem => marketItem.id === item.id)
+      if (itemIndex >= 0) {
+          this.market.splice(itemIndex, 1)
+      } else {
+          console.error('Tried to buy an item that was not in the market!')
+      }
   }
 
   selected(cb) {

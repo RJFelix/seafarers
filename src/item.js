@@ -94,3 +94,38 @@ export const createRandomItem = () => {
   const randomItem = createItemFromTemplate(itemTemplate, randomProducer)
   return randomItem
 }
+
+export const combineItems = (alreadyCombinedItem, newItem) => {
+  // We have to consider the case of alreadyCombinedItem = null
+  if (!alreadyCombinedItem) {
+      if (Array.isArray(newItem.madeBy)) {
+          return newItem
+      }
+      const item = {
+          ...newItem,
+          madeBy: [newItem.madeBy]
+      }
+      return item
+  }
+  let madeBy = []
+  if (Array.isArray(alreadyCombinedItem.madeBy)) {
+      madeBy = [newItem.madeBy].concat(alreadyCombinedItem.madeBy)
+  } else {
+      madeBy = [alreadyCombinedItem.madeBy, newItem.madeBy]
+  }
+  // Trick to shallow de-duplicate an array
+  const madeBySet = new Set(madeBy)
+  madeBy = Array.from(madeBySet)
+  
+  const item = {
+      id: uuid(),
+      weight: alreadyCombinedItem.weight + newItem.weight,
+      volume: alreadyCombinedItem.volume + newItem.volume,
+      value: alreadyCombinedItem.value + newItem.value,
+      rarity: newItem.rarity,
+      quantity: alreadyCombinedItem.quantity + newItem.quantity,
+      name: newItem.name,
+      madeBy
+  }
+  return item
+}

@@ -14,7 +14,6 @@ export default class World {
         this.ship = new Ship({ x: 0, y: 0 })
         this.locations.forEach(location => {
             location.selected(() => {
-                console.log(`setting ship destination to ${location.name}`)
                 this.ship.setDestination(location)
             })
         })

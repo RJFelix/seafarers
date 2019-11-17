@@ -1,0 +1,4 @@
+div.location-info {
+  flex: 1 0 30%;
+  min-width: 300px;
+}

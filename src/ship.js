@@ -5,22 +5,12 @@ import uuid from 'uuid/v4'
 import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 import { groupBy, radiansToDegrees, degreesToRadians } from './utils.js'
-import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate} from './item.js'
+import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate, combineItems } from './item.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
-    new Point(0, -1)
+    new Point(0, 1)
 )
-
-
-
-const removeAllChildren = (element) => {
-    if (element) {
-        while (element.firstChild) {
-            element.removeChild(element.firstChild)
-        }
-    }   
-}
 
 export default class Ship {
     constructor({ x, y, cargoHoldVolume }) {
@@ -35,6 +25,8 @@ export default class Ship {
 
         this.cargo = []
         this.cargoHoldVolume = cargoHoldVolume || 30000
+
+        this.onReachedDestinationListeners = []
 
         // Currently, the cargo hold can pack items in perfectly with no wasted space at all between items
         // as if it were melting items down into a liquid and storing them in a tank. Doubloons, for instance,
@@ -60,17 +52,6 @@ export default class Ship {
             return false
         }
     }
-    // OLD SELL CARGO FUNCTION:
-    // sellCargo(item) {
-    //     const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
-    //     if (index > -1) {
-    //         this.cargo.splice(index, 1)
-    //         const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
-    //         this.addCargo(payment)
-    //         return true
-    //     }
-    //     return false
-    // }
     sellCargo(item) {
         const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
         if (index > -1) {
@@ -97,100 +78,21 @@ export default class Ship {
         this.location = this.currentDestination
         this.location.refillMarket()
 
-        // const locationInfoEl = document.getElementById('locationInfo')
-        // removeAllChildren(locationInfoEl)
-
-        // this.location.market.forEach((item) => {
-        //     const itemEl = document.createElement('div')
-        //     const itemDescriptionEl = document.createElement('p')
-        //     itemDescriptionEl.innerText = `${item.name} made by ${item.madeBy} - $${item.value} - rarity ${item.rarity} - ${(Math.round(item.weight*100))/100} kg - ${(Math.round(item.volume*100))/100} m3`
-        //     itemEl.appendChild(itemDescriptionEl)
-        //     const itemBuyButton = document.createElement('button')
-        //     itemBuyButton.innerText = 'Buy'
-        //     itemBuyButton.addEventListener('click', (evt) => {
-        //         if (this.addCargo(item)) {
-        //             const index = this.location.market.findIndex((marketItem) => marketItem.id === item.id)
-        //             this.location.market.splice(index, 1)
-        //             locationInfoEl.removeChild(itemEl)
-        //         } else {
-        //             alert('Cannot buy; cargo hold full!')
-        //         }
-        //     })
-        //     itemEl.appendChild(itemBuyButton)
-        //     locationInfoEl.appendChild(itemEl)
-        // })
-
         this.currentDestination = null
         this.speed = 0
-    }
 
-    openShipInventory() {
-
-        // const shipInventoryEl = document.getElementById('shipInventory')
-        // removeAllChildren(shipInventoryEl)
-
-        // this.cargo.forEach((item) => {
-        //     const itemEl = document.createElement('div')
-        //     const itemDescriptionEl = document.createElement('p')
-        //     itemDescriptionEl.innerText = `${item.quantity}x ${item.name} made by ${item.madeBy}: - $${item.value} - rarity ${item.rarity} - ${(Math.round(item.weight*100))/100} kg - ${(Math.round(item.volume*100))/100} m3`
-        //     itemEl.appendChild(itemDescriptionEl)
-        //     const itemSellButton = document.createElement('button')
-        //     itemSellButton.innerText = 'Sell'
-        //     itemSellButton.addEventListener('click', (evt) => {
-        //         if (!this.sellCargo(item)) {
-        //             alert('Cannot sell; cargo hold empty!')
-        //         }
-        //     })
-        //     itemEl.appendChild(itemSellButton)
-        //     shipInventoryEl.appendChild(itemEl)
-        // })
+        this.onReachedDestinationListeners.forEach(listener => listener(this.location))
     }
 
     groupShipInventory() {
         // We are assuming that the two items here are already valid items
         // combineItems should take two items, and return the combination of the two
-        const combineItems = (alreadyCombinedItem, newItem) => {
-            // We have to consider the case of alreadyCombinedItem = null
-            if (!alreadyCombinedItem) {
-                if (Array.isArray(newItem.madeBy)) {
-                    return newItem
-                }
-                const item = {
-                    ...newItem,
-                    madeBy: [newItem.madeBy]
-                }
-                return item
-            }
-            let madeBy = []
-            if (Array.isArray(alreadyCombinedItem.madeBy)) {
-                madeBy = [newItem.madeBy].concat(alreadyCombinedItem.madeBy)
-            } else {
-                madeBy = [alreadyCombinedItem.madeBy, newItem.madeBy]
-            }
-            // Trick to shallow de-duplicate an array
-            const madeBySet = new Set(madeBy)
-            madeBy = Array.from(madeBySet)
-            
-            const item = {
-                id: uuid(),
-                weight: alreadyCombinedItem.weight + newItem.weight,
-                volume: alreadyCombinedItem.volume + newItem.volume,
-                value: alreadyCombinedItem.value + newItem.value,
-                rarity: newItem.rarity,
-                quantity: alreadyCombinedItem.quantity + newItem.quantity,
-                name: newItem.name,
-                madeBy
-            }
-            return item
-        }
+        
         this.cargo = groupBy(this.cargo, ["name", "rarity"], combineItems)
-        this.openShipInventory()
     }
 
     setDestination(destination) {
         this.location = null
-        // const locationInfoEl = document.getElementById('locationInfo')
-        // removeAllChildren(locationInfoEl)
         this.currentDestination = destination
         this.speed = 1
         this.path = new Vector(
@@ -205,11 +107,14 @@ export default class Ship {
             this.position = this.position.translate(velocity)
             this.angle = referenceVector.angleTo(this.path) + degreesToRadians(90)
 
-            // const destination = this.destinations[this.currentDestinationIndex]
             const destination = this.currentDestination
             if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
                 this.reachedDestination()
             }
         }
+    }
+
+    onReachedDestination(listener) {
+        this.onReachedDestinationListeners.push(listener)
     }
 }

@@ -1,0 +1,74 @@
+div.market-modal {
+  position: absolute;
+  width: 60vw;
+  height: 90vh;
+  background: #f1e767; /* Old browsers */
+  background: -moz-linear-gradient(-45deg, #f1e767 0%, #feb645 100%); /* FF3.6-15 */
+  background: -webkit-linear-gradient(-45deg, #f1e767 0%,#feb645 100%); /* Chrome10-25,Safari5.1-6 */
+  background: linear-gradient(135deg, #f1e767 0%,#feb645 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+  border: 5px solid #8f9957;
+  -webkit-box-shadow: 7px 7px 16px 0px rgba(0,0,0,0.41);
+  -moz-box-shadow: 7px 7px 16px 0px rgba(0,0,0,0.41);
+  box-shadow: 7px 7px 16px 0px rgba(0,0,0,0.41);
+  padding: 20px 10px;
+}
+
+div.market-items {
+  overflow: scroll;
+}
+
+div.market-items * {
+  display: inline-block;
+}
+
+div.market-items > div.market-item {
+  width: 100%;
+  height: 10%;
+  min-height: 20px;
+  display: flex;
+  justify-content: space-around;
+}
+
+div.market-item > div.market-item-quantity {
+  flex: 0 0 20%;
+}
+
+div.market-item > div.market-item-button {
+  flex: 0 0 20%;
+}
+
+div.market-item-button-left {
+  border-radius: 50% 0 0 50%;
+  padding-left: 8px;
+  border: 2px solid black;
+}
+
+div.market-item-button {
+  background-color: #e3d36b;
+}
+
+div.market-item-button-inactive {
+  background-color: rgb(200,200,200);
+}
+
+div.market-item-button-active:hover {
+  -webkit-box-shadow: 6px 6px 22px 2px rgba(0,0,0,0.28);
+  -moz-box-shadow: 6px 6px 22px 2px rgba(0,0,0,0.28);
+  box-shadow: 6px 6px 22px 2px rgba(0,0,0,0.28);
+}
+
+div.market-item-button-left > span {
+  width: 100%;
+  text-align: right;
+}
+
+div.market-item-button-right {
+  border-radius: 0 50% 50% 0;
+  padding-right: 8px;
+  border: 2px solid black;
+}
+
+div.market-item > div.market-item-name {
+  flex: 0 0 20%;
+  border: 2px solid black;
+}
