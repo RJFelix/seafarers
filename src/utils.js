@@ -1,4 +1,6 @@
 export const randomInt = (min, max) => min + Math.floor(Math.random() * max)
+export const degreesToRadians = degrees => degrees * (Math.PI / 180)
+export const radiansToDegrees = radians => radians * (180 / Math.PI)
 
 export const normalDistribution = (min, max, skew) => {
     var u = 0, v = 0

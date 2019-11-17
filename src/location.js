@@ -1,49 +1,24 @@
 import Konva from 'konva'
 import { Point } from '@flatten-js/core'
 import { createItemFromProducer } from './item.js'
+import uuid from 'uuid/v4'
 
 export default class Location {
   constructor( { name, x, y, producer } ) {
+      this.id = uuid()
       this.name = name
       this.market = []
       this.position = new Point(x, y)
       this.color = 'rgb(0,0,0)'
       this.producer = producer
-
-      this.view = new Konva.Group({
-          x: this.position.x,
-          y: this.position.y,
-          rotation: 0
-      })
-
-      this.rect = new Konva.Rect({
-          x: 0,
-          y: 0,
-          width: 10,
-          height: 10,
-          fill: 'green',
-          stroke: 'black'
-      })
-
-      this.text = new Konva.Text({
-          x: 15,
-          y: 0,
-          text: this.name
-      })
-
       this.onSelectListeners = []
 
-      this.view.add(this.rect)
-      this.view.add(this.text)
-      this.view.on('mouseenter', () => {
-          this.rect.fill('yellow')
-      })
-      this.view.on('click', () => {
-          this.onSelectListeners.forEach(listener => listener())
-      })
-      this.view.on('mouseleave', () => {
-          this.rect.fill('green')
-      })
+      this.onClick = this.onClick.bind(this)
+  }
+
+  onClick() {
+    console.log(`Click location ${this.name}`)
+    this.onSelectListeners.forEach(listener => listener())
   }
 
   getView() {

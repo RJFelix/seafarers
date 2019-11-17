@@ -14,25 +14,10 @@ export default class World {
         this.ship = new Ship({ x: 0, y: 0 })
         this.locations.forEach(location => {
             location.selected(() => {
+                console.log(`setting ship destination to ${location.name}`)
                 this.ship.setDestination(location)
             })
         })
-
-        this.view = new Konva.Group({
-            x: 0,
-            y: 0
-        })
-
-        this.locations.forEach(location => {
-            this.view.add(location.getView())
-        })
-
-        this.view.add(this.ship.getView())
-
-        const manifestDiv = document.getElementById('shipManifest')
-    }
-    getView() {
-        return this.view
     }
     update() {
         this.ship.update()

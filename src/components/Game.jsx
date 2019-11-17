@@ -27,8 +27,11 @@ class Game extends React.Component {
 
   tick(timestamp) {
     // update the game
-    const timeSinceLastUpdate = timestamp - lastTimestamp
-    this.world.update(timeSinceLastUpdatee)
+    const timeSinceLastUpdate = timestamp - this.state.lastTimestamp
+    this.world.update(timeSinceLastUpdate)
+    this.setState({
+      lastTimestamp: timestamp
+    })
     window.requestAnimationFrame((timestamp) => this.tick(timestamp))
   }
 
@@ -46,7 +49,7 @@ class Game extends React.Component {
     return (
       <div>
         <WorldMap
-          view={this.world.getView()}
+          world={this.world}
         />
         <LocationInfo
           locationName={this.state.locationName}
