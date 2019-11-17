@@ -30,21 +30,6 @@ export default class World {
         this.view.add(this.ship.getView())
 
         const manifestDiv = document.getElementById('shipManifest')
-        window.addEventListener('keypress', evt => {
-            if (evt.key === 'a') {
-                const randomItem = createRandomItem('Cargo')
-                const didAddItem = this.ship.addCargo(randomItem)
-                if (didAddItem) {
-                    // add a line to the cargo manifest in the HTML document
-                    const itemListingElement = document.createElement('p')
-                    const itemText = `Added to Inventory: ${randomItem.name} made by ${randomItem.madeBy}: ${randomItem.volume} liters - ${randomItem.weight}kg - $${randomItem.value} - ${randomItem.rarity} rarity`
-                    itemListingElement.textContent = itemText
-                    manifestDiv.appendChild(itemListingElement)
-                } else {
-                    alert('Cargo hold full!')
-                }
-            }
-        })
     }
     getView() {
         return this.view
