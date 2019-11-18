@@ -48,10 +48,11 @@ export default class Ship {
             return false
         }
     }
-    sellCargo(item) {
+    sellCargo(item, buyer) {
         const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
         if (index > -1) {
             const payment = this.getPaymentFromValue(item.value)
+            buyer.push(item)
             this.cargo.splice(index, 1)
             this.addCargo(payment)
             return true
@@ -60,12 +61,11 @@ export default class Ship {
     }
 
     getPaymentFromValue(value) {
-        const payment = createItemFromProducer(producerTemplates[3], itemTemplates[3])
-
+        const payment = createItemFromProducer(producerTemplates[0], itemTemplates[0])
+        payment.quantity = value
         payment.weight *= value
         payment.volume *= value
         payment.value *= value
-        payment.quantity *= value
 
         return payment
     }

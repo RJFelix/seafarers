@@ -4,26 +4,26 @@ import Location from './location.js'
 export default [
     new Location({
         name: 'Naples',
-        x: 75,
-        y: 51,
-        producer: producers[1]
+        x: 403,
+        y: 143,
+        producer: [producers[3], producers[4]]
     }),
     new Location({
-        name: 'Venice',
-        x: 94,
-        y: 200,
-        producer: producers[2]
+        name: 'Havana',
+        x: 200,
+        y: 212,
+        producer: [producers[2], producers[3]]
     }),
     new Location({
         name: 'Alexandria',
-        x: 241,
-        y: 197,
-        producer: producers[4]
+        x: 435,
+        y: 180,
+        producer: [producers[1], producers[2]]
     }),
     new Location({
         name: 'Shanghai',
-        x: 400,
-        y: 400,
-        producer: producers[0]
+        x: 630,
+        y: 180,
+        producer: [producers[4], producers[1]]
     })
 ]

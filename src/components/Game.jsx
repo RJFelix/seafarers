@@ -49,7 +49,7 @@ class Game extends React.Component {
 
   onSellItem(item) {
     if (item) {
-      this.world.ship.sellCargo(item)
+      this.world.ship.sellCargo(item, this.itemsForMarket)
     }
   }
 

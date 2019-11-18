@@ -17,13 +17,19 @@ import producerTemplates from './producer-templates.js'
 export const createItemFromProducer = (producer) => {
   const itemTemplate = itemTemplates[producer.itemId]
   const item = createItemFromTemplate(itemTemplate, producer)
-
   if (itemTemplate.hasRarity) {
     const roll = normalDistribution(1, 100, 1)
     item.rarity = producer.skill * (roll/50)
     item.rarity = Math.round(item.rarity)
     item.value = item.baseValue*(factorialize(item.rarity))
+  } else {
+    item.value = item.baseValue
   }
+  // Multiply item values by producer.quantity
+  item.weight *= producer.quantity
+  item.volume *= producer.quantity
+  item.value *= producer.quantity
+  item.quantity = producer.quantity
 
   return item
 }

@@ -23,7 +23,10 @@ export default class Location {
 
   refillMarket() {
     if (this.producer) {
-      const newItems = new Array(5).fill(0).map(() => createItemFromProducer(this.producer))
+      /* Before making this.producer an array */
+      // const newItems = new Array(5).fill(0).map(() => createItemFromProducer(this.producer))
+
+      const newItems = this.producer.map(n => createItemFromProducer(n))
       this.market = groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems)
     }
   }
