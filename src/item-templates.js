@@ -11,8 +11,8 @@ export default [
     {
         template: {
             name: 'Cannonball',
-            weight: 300,
-            volume: 50,
+            weight: 5.4, // 12 lb ball
+            volume: 0.000731, // 2.2 in radius
         },
         hasRarity: false
     },

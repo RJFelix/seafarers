@@ -28,10 +28,6 @@ export default class Ship {
 
         this.onReachedDestinationListeners = []
 
-        // Currently, the cargo hold can pack items in perfectly with no wasted space at all between items
-        // as if it were melting items down into a liquid and storing them in a tank. Doubloons, for instance,
-        // are coins that waste space in the real world due to their cylindrical shape. But the cargo hold
-        // saves that space.
     }
 
     addCargo(item) {
