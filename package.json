@@ -34,8 +34,10 @@
   },
   "dependencies": {
     "@flatten-js/core": "^1.0.18",
+    "fs": "0.0.1-security",
     "konva": "^4.0.17",
     "mathjs": "^6.2.3",
+    "pathfinding": "^0.4.18",
     "react": "^16.12.0",
     "react-dom": "^16.12.0",
     "react-hot-loader": "^4.12.18",

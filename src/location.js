@@ -3,6 +3,7 @@ import { Point } from '@flatten-js/core'
 import { createItemFromProducer, combineItems } from './item.js'
 import { groupBy } from './utils.js'
 import uuid from 'uuid/v4'
+import { makeAMap } from './map-matrix.js'
 
 export default class Location {
   constructor( { name, x, y, producer } ) {
@@ -28,6 +29,7 @@ export default class Location {
 
       const newItems = this.producer.map(n => createItemFromProducer(n))
       this.market = groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems)
+      makeAmap()
     }
   }
 

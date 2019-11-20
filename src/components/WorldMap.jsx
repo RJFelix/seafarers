@@ -32,7 +32,7 @@ class WorldMap extends React.Component {
     return (
       <Stage 
         width={800}
-        height={600}
+        height={500}
         className='world-map'>
         <Layer>
           {this.state.backgroundImage &&
@@ -40,7 +40,7 @@ class WorldMap extends React.Component {
             x={0}
             y={0}
             width={800}
-            height={600}
+            height={500}
             image={this.state.backgroundImage}
           />
           }
