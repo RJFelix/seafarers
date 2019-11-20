@@ -24,6 +24,8 @@ export default class Ship {
         this.currentDestination = null
 
         this.cargo = []
+        //Give Starting Cash
+        this.cargo.push(this.getPaymentFromValue(10000))
         this.cargoHoldVolume = cargoHoldVolume || 30000
 
         this.onReachedDestinationListeners = []
@@ -48,11 +50,10 @@ export default class Ship {
             return false
         }
     }
-    sellCargo(item, buyer) {
+    sellCargo(item) {
         const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
         if (index > -1) {
             const payment = this.getPaymentFromValue(item.value)
-            buyer.push(item)
             this.cargo.splice(index, 1)
             this.addCargo(payment)
             return true

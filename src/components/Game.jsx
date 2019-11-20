@@ -42,14 +42,48 @@ class Game extends React.Component {
   }
 
   onBuyItem(item) {
-    if (item && this.world.ship.addCargo(item)) {
-      this.world.ship.location.buyItem(item)
+    const coverChargeObject = this.world.ship.cargo.find(element => element.name == "Doubloon")
+    if (item && coverChargeObject && (coverChargeObject.value >= item.value)) {
+      if (this.world.ship.addCargo(item)) {
+        this.world.ship.location.buyItem(item)
+        // Add Payment to the Market
+        this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(item.value))
+        // Remove Payment from the Ship
+        const doubloonIndex = this.world.ship.cargo.findIndex(element => element.name == "Doubloon")
+        const newBalance = this.world.ship.cargo[doubloonIndex].value - item.value
+        this.world.ship.cargo.splice(doubloonIndex, 1)
+        this.world.ship.cargo.push(this.world.ship.getPaymentFromValue(newBalance))
+      } else {
+        console.log("Can't add cargo. Max Capacity?")
+      }
+    } else {
+      if (!item) {
+        console.log("Not Item")
+      }
+      if (!coverChargeObject) {
+        console.log("No Doubloons")
+      }
+      if (!(coverChargeObject.value >= item.value)) {
+        console.log("Not Enough Doubloons")
+      }
     }
   }
 
   onSellItem(item) {
     if (item) {
-      this.world.ship.sellCargo(item, this.itemsForMarket)
+      const coverChargeObject = this.world.ship.location.market.find(element => element.name == "Doubloon")
+      if(coverChargeObject && coverChargeObject.value >= item.value) {
+        this.world.ship.sellCargo(item)
+        // Put the sold item into the market inventory.
+        this.world.ship.location.market.push(item)
+        // Remove Payment from the Market
+        const doubloonIndex = this.world.ship.location.market.findIndex(element => element.name == "Doubloon")
+        const newBalance = this.world.ship.location.market[doubloonIndex].value - item.value
+        this.world.ship.location.market.splice(doubloonIndex, 1)
+        this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(newBalance))
+      } else {
+        console.log("Market can't afford that item!")
+      }
     }
   }
 
