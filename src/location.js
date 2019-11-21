@@ -29,7 +29,7 @@ export default class Location {
 
       const newItems = this.producer.map(n => createItemFromProducer(n))
       this.market = groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems)
-      makeAmap()
+      makeAMap()
     }
   }
 
