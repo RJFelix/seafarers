@@ -60,13 +60,15 @@ class WorldMap extends React.Component {
       previousClick: currentClick,
       currentClick: { x, y }
     }, () => {
-      findPathAsync(this.state.previousClick, this.state.currentClick)
+      findPathAsync(this.props.world.ship.position, this.state.currentClick)
         .then(coords => {
           this.pathCoordinates = []
           for (let i = 0; i < coords.length; i++) {
             this.pathCoordinates.push(coords[i].x)
             this.pathCoordinates.push(coords[i].y)
           }
+
+          this.props.newPath(coords)
 
           this.setState({
             pathSequence: this.state.pathSequence + 1

@@ -73,13 +73,16 @@ export default class Ship {
     }
 
     reachedDestination() {
-        this.location = this.currentDestination
-        this.location.refillMarket()
+        this.usePath = false
+        if (this.currentDestination) {
+            this.location = this.currentDestination
+            this.location.refillMarket()
 
-        this.currentDestination = null
-        this.speed = 0
+            this.currentDestination = null
+            this.speed = 0
 
-        this.onReachedDestinationListeners.forEach(listener => listener(this.location))
+            this.onReachedDestinationListeners.forEach(listener => listener(this.location))
+        }
     }
 
     groupShipInventory() {
@@ -90,6 +93,7 @@ export default class Ship {
     }
 
     setDestination(destination) {
+        this.usePath = false
         this.location = null
         this.currentDestination = destination
         this.speed = 1
@@ -99,7 +103,28 @@ export default class Ship {
         )
     }
 
+    setPath(newPath) {
+        this.usePath = true
+        this.location = null
+        this.currentPath = newPath
+        this.speed = 1
+        this.currentLocationIndex = 0
+    }
+
     update(currentGameTime) {
+        if (this.usePath) {
+            const currentPosition = this.currentPath[this.currentLocationIndex]
+            this.currentLocationIndex++
+            const nextPosition = this.currentPath[this.currentLocationIndex]
+            if (!nextPosition) {
+                return this.reachedDestination()
+            }
+            const currentPoint = new Point(currentPosition.x, currentPosition.y)
+            const nextPoint = new Point(nextPosition.x, nextPosition.y)
+            const path = new Vector(currentPoint, nextPoint)
+            this.angle = referenceVector.angleTo(path) + degreesToRadians(90)
+            this.position = nextPoint 
+        }
         if (this.currentDestination) {
             const velocity = this.path.normalize().multiply(this.speed)
             this.position = this.position.translate(velocity)

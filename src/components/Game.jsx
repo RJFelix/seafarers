@@ -30,6 +30,7 @@ class Game extends React.Component {
     this.onShipReachedDestination = this.onShipReachedDestination.bind(this)
     this.getItemsForMarket = this.getItemsForMarket.bind(this)
     this.onMarketExit = this.onMarketExit.bind(this)
+    this.onNewPath = this.onNewPath.bind(this)
 
     this.world.ship.onReachedDestination(this.onShipReachedDestination)
 
@@ -223,17 +224,22 @@ class Game extends React.Component {
     return []
   }
 
+  onNewPath(path) {
+    this.world.ship.setPath(path)
+  }
+
   // These run in a loop
   render() {
     return (
       <div className='game'>
         <WorldMap
           world={this.world}
+          newPath={this.onNewPath}
         />
-        <ShipInfo
+        {/* <ShipInfo
           ship={this.world.ship}
           onSellItem={this.onSellItem}
-        />
+        /> */}
         <h1>Time: {this.state.gameTime} days</h1>
         <h2>Speed: {this.state.gameSpeed} days/sec</h2>
         <h3>Timestamp: {this.state.timestamp}</h3>

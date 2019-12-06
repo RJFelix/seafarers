@@ -21,9 +21,13 @@ export default class World {
     }
     update(currentGameTime) {
 
-        // this.ship.update(currentGameTime)
+        this.ship.update(currentGameTime)
     }
     updateGame(currentGameTime) {
-        this.ship.update(currentGameTime)
+        // this.ship.update(currentGameTime)
+    }
+
+    updatePath(newPath) {
+        this.ship.setPath(newPath)
     }
 }

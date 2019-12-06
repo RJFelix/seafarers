@@ -24,7 +24,11 @@ easystar.enableDiagonals()
 easystar.enableSync()
 export const findPathAsync = (origin, destination) => {
     return new Promise((resolve, reject) => {
-        easystar.findPath(origin.x, origin.y, destination.x, destination.y, path => {
+        easystar.findPath(Math.round(origin.x), 
+                          Math.round(origin.y), 
+                          Math.round(destination.x), 
+                          Math.round(destination.y), 
+                          path => {
             if (path) {
                 resolve(path)
             } else {
