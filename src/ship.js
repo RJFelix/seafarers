@@ -6,6 +6,7 @@ import itemTemplates from './item-templates.js'
 import producerTemplates from './producer-templates.js'
 import { groupBy, radiansToDegrees, degreesToRadians } from './utils.js'
 import /*Item,*/ { createItemFromProducer, createRandomItem, createItemFromTemplate, combineItems } from './item.js'
+import shipTemplate from './ship-templates.js'
 
 const referenceVector = new Vector(
     new Point(0, 0),
@@ -98,7 +99,7 @@ export default class Ship {
         )
     }
 
-    update() {
+    update(currentGameTime) {
         if (this.currentDestination) {
             const velocity = this.path.normalize().multiply(this.speed)
             this.position = this.position.translate(velocity)
@@ -113,5 +114,9 @@ export default class Ship {
 
     onReachedDestination(listener) {
         this.onReachedDestinationListeners.push(listener)
+    }
+
+    createShipType(index) {
+        this.type = shipTemplate[index]
     }
 }

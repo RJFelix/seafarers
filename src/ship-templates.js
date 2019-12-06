@@ -1,6 +1,6 @@
 export default [
     {
-        type: 'Sloop',
+        name: 'Sloop',
         masts: 1,
         sailsRequired: 1,
         hullSize: 10,
@@ -10,7 +10,7 @@ export default [
         inventories: {cargo: 268 /* 67 = 40' standard container */, cannonBalls: 40, larder: 2, berthing: 20}
     },
     {
-        type: 'Brigantine',
+        name: 'Brigantine',
         masts: 2,
         sailsRequired: 3,
         hullSize: 30,
@@ -20,7 +20,7 @@ export default [
         inventories: {cargo: 536, cannonBalls: 80, larder: 5, berthing: 50}
     },
     {
-        type: 'Carrack',
+        name: 'Carrack',
         masts: 3,
         sailsRequired: 7,
         hullSize: 90,
@@ -30,7 +30,7 @@ export default [
         inventories: {cargo: 1608, cannonBalls: 200, larder: 20, berthing: 200}
     },
     {
-        type: 'Galleon',
+        name: 'Galleon',
         masts: 4,
         sailsRequired: 10,
         hullSize: 120,
@@ -40,7 +40,7 @@ export default [
         inventories: {cargo: 2144, cannonBalls: 400, larder: 30, berthing: 300}
     },
     {
-        type: 'Frigate',
+        name: 'Frigate',
         masts: 5,
         sailsRequired: 14,
         hullSize: 200,

@@ -1,6 +1,7 @@
 import React from 'react'
 import Konva from 'konva'
 import { flatten } from 'lodash'
+import Paper from '@material-ui/core/Paper'
 
 import { Stage, Layer, Line, Image as KonvaImage } from 'react-konva'
 
@@ -43,10 +44,10 @@ class WorldMap extends React.Component {
   }
 
   onStageClick(evt) {
-    const x = evt.evt.x
-    const y = evt.evt.y
+    const x = evt.evt.offsetX
+    const y = evt.evt.offsetY
 
-    if(Object.keys(this.state.currentClick).length === 0) {
+    if (Object.keys(this.state.currentClick).length === 0) {
       this.setState({
         currentClick: {
           x, y
@@ -77,40 +78,42 @@ class WorldMap extends React.Component {
   render() {
     const world = this.props.world
     return (
-      <Stage 
-        width={width}
-        height={height}
-        onclick={this.onStageClick}
-        className='world-map'>
-        <Layer>
-          {this.state.backgroundImage &&
-          <KonvaImage
-            x={0}
-            y={0}
+      <div className='world-map-container'>
+          <Stage
             width={width}
             height={height}
-            image={this.state.backgroundImage}
-          />
-          }
-          {this.pathCoordinates && 
-          <Line
-            points={this.pathCoordinates}
-            stroke={'#FF0000'}
-            strokeWidth={3}
-          />
-          }
-          {world.locations.map(location => 
-          <Location 
-            key={location.id}
-            location={location} 
-            onClick={location.onClick}
-          />
-          )}
-          <Ship
-            ship={world.ship}
-          />
-        </Layer>
-      </Stage>
+            onclick={this.onStageClick}
+            className='world-map'>
+            <Layer>
+              {this.state.backgroundImage &&
+                <KonvaImage
+                  x={0}
+                  y={0}
+                  width={width}
+                  height={height}
+                  image={this.state.backgroundImage}
+                />
+              }
+              {this.pathCoordinates &&
+                <Line
+                  points={this.pathCoordinates}
+                  stroke={'#FF0000'}
+                  strokeWidth={3}
+                />
+              }
+              {world.locations.map(location =>
+                <Location
+                  key={location.id}
+                  location={location}
+                  onClick={location.onClick}
+                />
+              )}
+              <Ship
+                ship={world.ship}
+              />
+            </Layer>
+          </Stage>
+      </div>
     )
   }
 }

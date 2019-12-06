@@ -12,13 +12,18 @@ export default class World {
         this.name = ''
         this.locations = locationData
         this.ship = new Ship({ x: 0, y: 0 })
+        this.ship.createShipType(0)
         this.locations.forEach(location => {
             location.selected(() => {
                 this.ship.setDestination(location)
             })
         })
     }
-    update() {
-        this.ship.update()
+    update(currentGameTime) {
+
+        // this.ship.update(currentGameTime)
+    }
+    updateGame(currentGameTime) {
+        this.ship.update(currentGameTime)
     }
 }

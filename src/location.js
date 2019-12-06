@@ -32,6 +32,10 @@ export default class Location {
     }
   }
 
+  regroupItems() {
+    this.market = groupBy(this.market, ["name", "rarity"], combineItems).filter(item => item.quantity > 0)
+  }
+
   getItemValue(item) {
       // calculates the item's value at this location
       // returns it

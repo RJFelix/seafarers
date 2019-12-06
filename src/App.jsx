@@ -4,7 +4,8 @@ import Game from './components/Game.jsx'
 class App extends React.Component {
   render() {
     return (
-      <Game />
+      <Game
+      />
     )
   }
 }

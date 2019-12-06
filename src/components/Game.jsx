@@ -4,6 +4,8 @@ import LocationInfo from './LocationInfo.jsx'
 import WorldMap from './WorldMap.jsx'
 import ShipInfo from './ShipInfo.jsx'
 import Market from './Market.jsx'
+import NewMarket from './NewMarket.jsx'
+import ShipTable from './ShipTable.jsx'
 
 import World from '../world.js'
 
@@ -12,32 +14,57 @@ import '../styles/Game.css'
 class Game extends React.Component {
   constructor(props) {
     super(props)
-    // OLD CODE
-    // initial setup of internal state etc.
     this.world = new World()
-
     // NEW CODE
     this.state = {
-      marketOpen: false
+      marketOpen: false,
+      gameTime: 0,
+      gameSpeed: 1, // per second?
+      gameTimeLastUpdatedTimestamp: 0
     }
 
     this.tick = this.tick.bind(this)
     this.onBuyItem = this.onBuyItem.bind(this)
+    this.onBuyItems = this.onBuyItems.bind(this)
     this.onSellItem = this.onSellItem.bind(this)
     this.onShipReachedDestination = this.onShipReachedDestination.bind(this)
     this.getItemsForMarket = this.getItemsForMarket.bind(this)
     this.onMarketExit = this.onMarketExit.bind(this)
 
     this.world.ship.onReachedDestination(this.onShipReachedDestination)
+
+    window.addEventListener('keypress', evt => {
+      if (evt.key === '+') {
+        this.setState({
+          gameSpeed: this.state.gameSpeed * 1.5
+        })
+      } else if (evt.key === '-') {
+        this.setState({
+          gameSpeed: this.state.gameSpeed * 0.5
+        })
+      }
+    })
   }
 
   tick(timestamp) {
     // update the game
     const timeSinceLastUpdate = timestamp - this.state.lastTimestamp
-    this.world.update(timeSinceLastUpdate)
-    this.setState({
-      lastTimestamp: timestamp
-    })
+    // update if some time has passed 
+    if (timestamp > this.state.lastTimestamp + 50) {
+      // update the game clock if enough time has passed
+      if (timestamp > this.state.gameTimeLastUpdatedTimestamp + ((1 / this.state.gameSpeed) * 1000)) {
+        const newGameTime = this.state.gameTime + 1
+        this.world.updateGame(newGameTime)
+        this.setState({
+          gameTime: newGameTime,
+          gameTimeLastUpdatedTimestamp: timestamp
+        })
+      }
+      this.world.update(timeSinceLastUpdate)
+      this.setState({
+        lastTimestamp: timestamp
+      })
+    }
     window.requestAnimationFrame((timestamp) => this.tick(timestamp))
   }
 
@@ -48,6 +75,7 @@ class Game extends React.Component {
         this.world.ship.location.buyItem(item)
         // Add Payment to the Market
         this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(item.value))
+        this.world.ship.location.regroupItems()
         // Remove Payment from the Ship
         const doubloonIndex = this.world.ship.cargo.findIndex(element => element.name == "Doubloon")
         const newBalance = this.world.ship.cargo[doubloonIndex].value - item.value
@@ -69,6 +97,14 @@ class Game extends React.Component {
     }
   }
 
+  onBuyItems(items) {
+    items.forEach(item => this.onBuyItem(item))
+  }
+
+  onSellItems(items) {
+    items.forEach(item => this.onSellItem(item))
+  }
+
   onSellItem(item) {
     if (item) {
       const coverChargeObject = this.world.ship.location.market.find(element => element.name == "Doubloon")
@@ -81,6 +117,7 @@ class Game extends React.Component {
         const newBalance = this.world.ship.location.market[doubloonIndex].value - item.value
         this.world.ship.location.market.splice(doubloonIndex, 1)
         this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(newBalance))
+        this.world.ship.location.regroupItems()
       } else {
         console.log("Market can't afford that item!")
       }
@@ -172,6 +209,20 @@ class Game extends React.Component {
    })
   }
 
+  getShipInventory() {
+    if (this.world.ship.cargo) {
+      return this.world.ship.cargo
+    }
+    return []
+  }
+
+  itemsAtLocation() {
+    if (this.world.ship.location) {
+      return this.world.ship.location.market
+    }
+    return []
+  }
+
   // These run in a loop
   render() {
     return (
@@ -179,20 +230,25 @@ class Game extends React.Component {
         <WorldMap
           world={this.world}
         />
-        <LocationInfo
-          location={this.world.ship.location}
-          onBuyItem={this.onBuyItem}
-        />
         <ShipInfo
           ship={this.world.ship}
           onSellItem={this.onSellItem}
         />
+        <h1>Time: {this.state.gameTime} days</h1>
+        <h2>Speed: {this.state.gameSpeed} days/sec</h2>
+        <h3>Timestamp: {this.state.timestamp}</h3>
+        <ShipTable
+          rows={this.getShipInventory()}
+          onBuyItems={this.onSellItems}
+          type={this.world.ship.type}
+        />
+          
         {this.state.marketOpen &&
-          <Market
-            items={this.getItemsForMarket()}
+          <NewMarket
+            rows={this.itemsAtLocation()}
+            location={this.world.ship.location}
             onExit={this.onMarketExit}
-            onLeftClick={(item) => this.onSellItem(item.rightItem)}
-            onRightClick={(item) => this.onBuyItem(item.leftItem)}
+            onBuyItems={this.onBuyItems}
           />
         }
       </div>
