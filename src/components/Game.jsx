@@ -6,8 +6,11 @@ import ShipInfo from './ShipInfo.jsx'
 import Market from './Market.jsx'
 import NewMarket from './NewMarket.jsx'
 import ShipTable from './ShipTable.jsx'
-
+import ShipList from './ShipList.jsx'
+import SidePanel from './SidePanel.jsx'
 import World from '../world.js'
+import Grid from '@material-ui/core/Grid'
+import Paper from '@material-ui/core/Paper'
 
 import '../styles/Game.css'
 
@@ -27,46 +30,35 @@ class Game extends React.Component {
     this.onBuyItem = this.onBuyItem.bind(this)
     this.onBuyItems = this.onBuyItems.bind(this)
     this.onSellItem = this.onSellItem.bind(this)
+    this.onSellItems = this.onSellItems.bind(this)
     this.onShipReachedDestination = this.onShipReachedDestination.bind(this)
     this.getItemsForMarket = this.getItemsForMarket.bind(this)
     this.onMarketExit = this.onMarketExit.bind(this)
     this.onNewPath = this.onNewPath.bind(this)
 
     this.world.ship.onReachedDestination(this.onShipReachedDestination)
-
-    window.addEventListener('keypress', evt => {
-      if (evt.key === '+') {
-        this.setState({
-          gameSpeed: this.state.gameSpeed * 1.5
-        })
-      } else if (evt.key === '-') {
-        this.setState({
-          gameSpeed: this.state.gameSpeed * 0.5
-        })
-      }
-    })
   }
 
   tick(timestamp) {
     // update the game
-    const timeSinceLastUpdate = timestamp - this.state.lastTimestamp
-    // update if some time has passed 
-    if (timestamp > this.state.lastTimestamp + 50) {
-      // update the game clock if enough time has passed
-      if (timestamp > this.state.gameTimeLastUpdatedTimestamp + ((1 / this.state.gameSpeed) * 1000)) {
-        const newGameTime = this.state.gameTime + 1
-        this.world.updateGame(newGameTime)
-        this.setState({
-          gameTime: newGameTime,
-          gameTimeLastUpdatedTimestamp: timestamp
-        })
-      }
-      this.world.update(timeSinceLastUpdate)
-      this.setState({
-        lastTimestamp: timestamp
-      })
-    }
-    window.requestAnimationFrame((timestamp) => this.tick(timestamp))
+    // const timeSinceLastUpdate = timestamp - this.state.lastTimestamp
+    // // update if some time has passed 
+    // if (timeSinceLastUpdate > 16) {
+    //   // update the game clock if enough time has passed
+    //   if (timestamp > this.state.gameTimeLastUpdatedTimestamp + ((1 / this.state.gameSpeed) * 1000)) {
+    //     const newGameTime = this.state.gameTime + 1
+    //     this.world.updateGame(newGameTime)
+    //     // this.setState({
+    //     //   gameTime: newGameTime,
+    //     //   gameTimeLastUpdatedTimestamp: timestamp
+    //     // })
+    //   }
+    //   this.world.update(timeSinceLastUpdate)
+    //   // this.setState({
+    //   //   lastTimestamp: timestamp
+    //   // })
+    // }
+    // window.requestAnimationFrame((timestamp) => this.tick(timestamp))
   }
 
   onBuyItem(item) {
@@ -96,6 +88,7 @@ class Game extends React.Component {
         console.log("Not Enough Doubloons")
       }
     }
+    this.forceUpdate()
   }
 
   onBuyItems(items) {
@@ -123,6 +116,7 @@ class Game extends React.Component {
         console.log("Market can't afford that item!")
       }
     }
+    this.forceUpdate()
   }
 
   onShipReachedDestination(location) {
@@ -138,11 +132,11 @@ class Game extends React.Component {
   }
 
   componentDidMount() {
-    window.requestAnimationFrame((timestamp) => {
+    this.world.onNewTime(({time, speed}) => {
       this.setState({
-        lastTimestamp: timestamp
+        gameTime: time,
+        gameSpeed: speed
       })
-      this.tick(timestamp)
     })
   }
   
@@ -212,6 +206,24 @@ class Game extends React.Component {
 
   getShipInventory() {
     if (this.world.ship.cargo) {
+      if (this.world.ship.location) {
+        const shipCargo = this.world.ship.cargo
+        const shipCargoWithPrices = shipCargo.map(item => {
+          marketItem = this.world.ship.location.market.find(it => it.name === item.name && it.rarity === item.rarity)
+          if (marketItem) {
+            return {
+              ...item,
+              buyPrice: marketItem.buyPrice
+            }
+          } else {
+            return {
+              ...item,
+              buyPrice: item.value * 3
+            }
+          }
+        })
+        return shipCargoWithPrices
+      }
       return this.world.ship.cargo
     }
     return []
@@ -230,33 +242,50 @@ class Game extends React.Component {
 
   // These run in a loop
   render() {
+    const compartments = {
+      info: [this.world.ship.type],
+      cargo: this.getShipInventory()
+    }
     return (
       <div className='game'>
-        <WorldMap
-          world={this.world}
-          newPath={this.onNewPath}
-        />
-        {/* <ShipInfo
-          ship={this.world.ship}
-          onSellItem={this.onSellItem}
-        /> */}
-        <h1>Time: {this.state.gameTime} days</h1>
-        <h2>Speed: {this.state.gameSpeed} days/sec</h2>
-        <h3>Timestamp: {this.state.timestamp}</h3>
-        <ShipTable
-          rows={this.getShipInventory()}
-          onBuyItems={this.onSellItems}
-          type={this.world.ship.type}
-        />
-          
-        {this.state.marketOpen &&
-          <NewMarket
-            rows={this.itemsAtLocation()}
-            location={this.world.ship.location}
-            onExit={this.onMarketExit}
-            onBuyItems={this.onBuyItems}
-          />
-        }
+        <Grid
+          container
+          direction="row"
+          justify="center"
+          alignItems="flex-start"
+        >
+          <Grid item xs={6}>
+            <WorldMap
+              world={this.world}
+              newPath={this.onNewPath}
+            />
+          </Grid>
+          {/* <ShipInfo
+            ship={this.world.ship}
+            onSellItem={this.onSellItem}
+          /> */}
+          <Grid item xs={6}>
+            <SidePanel>
+              <Paper className='game-details'>
+                <h3>Time: {this.state.gameTime} days; Speed: {this.state.gameSpeed} days/sec</h3>
+              </Paper>
+              <ShipTable
+                compartments={compartments}
+                onBuyItems={this.onSellItems}
+                type={this.world.ship.type}
+              />
+                
+              {this.state.marketOpen &&
+                <NewMarket
+                  rows={this.world.ship.location ? this.world.ship.location.market : []}
+                  location={this.world.ship.location}
+                  onExit={this.onMarketExit}
+                  onBuyItems={this.onBuyItems}
+                />
+              }
+            </SidePanel>
+          </Grid>
+        </Grid>
       </div>
     )
   }

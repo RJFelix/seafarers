@@ -23,6 +23,58 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
+const columnsFor = (compartment) => {
+  switch (compartment) {
+    case 'info':
+      return {
+        name: 'Name',
+        masts: 'Masts',
+        sailsRequired: 'Sails',
+        hullSize: 'Hull Size',
+        gunPorts: 'Gun Ports',
+        speed: 'Speed',
+        unladenMass: 'Unladen Mass',
+            }
+    case 'cargo':
+      return {
+        name: 'Name',
+        buyPrice: 'Price to Sell to Market',
+        weight: 'Weight (kg)',
+        volume: 'Volume (m3)',
+        quality: 'Quality',
+        quantity: 'Quantity'
+      }
+    case 'larder':
+      return {
+        name: 'Name',
+        weight: 'Weight (kg)',
+        volume: 'Volume (m3)',
+        quantity: 'Quantity'
+      }
+    case 'berthing':
+      return {
+        name: 'Name',
+        weight: 'Weight (kg)',
+        status: "Passenger/Crew",
+        destination: "Destination"
+      }
+    case 'cannonballs':
+      return {
+        weight: "Weight (kg)"
+      }
+    case 'manifest':
+      return {
+        name: 'Name',
+        purchased: 'Recieved From',
+        sold: 'Delivered To',
+        profitMargin: "Profit Margin",
+      }
+    
+    default:
+      return {}
+  }
+}
+
 function SimpleMenu(props) {
   const [anchorEl, setAnchorEl] = React.useState(null);
 
@@ -33,6 +85,11 @@ function SimpleMenu(props) {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  const handleSelect = compartment => () => {
+    handleClose()
+    return props.handleSelectCompartment(compartment)
+  }
 
   return (
     <div>
@@ -46,9 +103,12 @@ function SimpleMenu(props) {
         open={Boolean(anchorEl)}
         onClose={handleClose}
       >
-        <MenuItem onClick={handleClose}>{props.type.name}</MenuItem>
-        <MenuItem onClick={handleClose}>Larder</MenuItem>
-        <MenuItem onClick={handleClose}>Manifest</MenuItem>
+        <MenuItem onClick={handleSelect('info')}>{props.type.name}</MenuItem>
+        <MenuItem onClick={handleSelect('larder')}>Larder</MenuItem>
+        <MenuItem onClick={handleSelect('cargo')}>Cargo</MenuItem>
+        <MenuItem onClick={handleSelect('manifest')}>Manifest</MenuItem>
+        <MenuItem onClick={handleSelect('berthing')}>Berthing</MenuItem>
+        <MenuItem onClick={handleSelect('cannonballs')}>Cannonballs</MenuItem>
       </Menu>
     </div>
   );
@@ -103,11 +163,11 @@ function EnhancedTableHead(props) {
             inputProps={{ 'aria-label': 'select all desserts' }}
           />
         </TableCell>
-        {headCells.map(headCell => (
+        {props.headCells.map(headCell => (
           <TableCell
             key={headCell.id}
-            align={headCell.numeric ? 'right' : 'left'}
-            padding={headCell.disablePadding ? 'none' : 'default'}
+            align={'left'}
+            padding={'none'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
@@ -179,7 +239,8 @@ const EnhancedTableToolbar = props => {
         </Typography>
       )}
       <SimpleMenu
-        type={props.type}>
+        type={props.type}
+        handleSelectCompartment={props.handleSelectCompartment}>
       </SimpleMenu>
       {numSelected > 0 ? (
         <Tooltip title="Sell">
@@ -216,7 +277,6 @@ const useStyles = makeStyles(theme => ({
     marginBottom: theme.spacing(2),
   },
   table: {
-    minWidth: 750,
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -242,8 +302,9 @@ export default function EnhancedTable(props) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const rows = props.rows;
+  const [currentCompartment, setCurrentCompartment] = React.useState('info')
   const locationName = props.location ? props.location.name : 'At Sea?'
+  const rows = props.compartments[currentCompartment] || []
 
   const handleRequestSort = (event, property) => {
     const isDesc = orderBy === property && order === 'desc';
@@ -302,6 +363,19 @@ export default function EnhancedTable(props) {
       props.onBuyItems(selectedItems)
   }
 
+  const handleSelectCompartment = compartment => {
+    setCurrentCompartment(compartment)
+  }
+
+  const headCells = Object.entries(columnsFor(currentCompartment)).map(entry => {
+    const key = entry[0]
+    const label = entry[1]
+    return {
+      id: key,
+      label
+    }
+  })
+
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
@@ -310,6 +384,7 @@ export default function EnhancedTable(props) {
             locationName={locationName}
             buyItems={onBuyItems}
             type={props.type}
+            handleSelectCompartment={handleSelectCompartment}
         />
         <div className={classes.tableWrapper}>
           <Table
@@ -326,6 +401,7 @@ export default function EnhancedTable(props) {
               onSelectAllClick={handleSelectAllClick}
               onRequestSort={handleRequestSort}
               rowCount={rows.length}
+              headCells={headCells}
             />
             <TableBody>
               {stableSort(rows, getSorting(order, orderBy))
@@ -350,13 +426,15 @@ export default function EnhancedTable(props) {
                           inputProps={{ 'aria-labelledby': labelId }}
                         />
                       </TableCell>
-                      <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.name}
-                      </TableCell>
-                      <TableCell align="right">{row.value}</TableCell>
-                      <TableCell align="right">{row.weight}</TableCell>
-                      <TableCell align="right">{row.volume}</TableCell>
-                      <TableCell align="right">{row.quantity}</TableCell>
+                      {
+                        Object.entries(columnsFor(currentCompartment)).map(entry => {
+                          const key = entry[0]
+                          const label = entry[1]
+                          return (
+                            <TableCell align="left" key={`${key}-${row.id}`}>{row[key]}</TableCell>
+                          )
+                        })
+                      }
                     </TableRow>
                   );
                 })}

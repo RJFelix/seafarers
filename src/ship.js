@@ -20,10 +20,13 @@ export default class Ship {
             new Point(0, 0),
             this.position
         )
+        this.currentPath = []
+        this.currentLocationIndex = 0
+        this.currentPathFraction = 0
         this.speed = 0
 
         this.currentDestination = null
-
+        this.manifest = []
         this.cargo = []
         //Give Starting Cash
         this.cargo.push(this.getPaymentFromValue(10000))
@@ -33,7 +36,23 @@ export default class Ship {
 
     }
 
+    addToManifest(item, number) {
+        //number is 0 if buy, 1 if sell
+        //add location0 if buy, location1 if sell
+
+        if (number == 0) {
+            item.buyorsell = 0
+            item.location0 = this.location
+        } else {
+            item.buyorsell = 1
+            item.location1 = this.location
+        }
+
+        this.manifest.push(item)
+    }
+
     addCargo(item) {
+
         // Check to make sure there's room
         //   If the sum of this.cargo's volume properties + item.volume <= this.cargoHoldItem => there's room
         const sumFunction = (sum, item) => sum + item.volume
@@ -45,6 +64,7 @@ export default class Ship {
             // If there's room, add it to this ship's cargo and return true
             this.cargo.push(item)
             this.groupShipInventory()
+            this.addToManifest(item, 0)
             return true
         } else {
             // If not, return false
@@ -57,6 +77,7 @@ export default class Ship {
             const payment = this.getPaymentFromValue(item.value)
             this.cargo.splice(index, 1)
             this.addCargo(payment)
+            this.addToManifest(item, 1)
             return true
         }
         return false
@@ -73,6 +94,7 @@ export default class Ship {
     }
 
     reachedDestination() {
+        this.moving = false
         this.usePath = false
         if (this.currentDestination) {
             this.location = this.currentDestination
@@ -93,6 +115,7 @@ export default class Ship {
     }
 
     setDestination(destination) {
+        this.moving = true
         this.usePath = false
         this.location = null
         this.currentDestination = destination
@@ -104,6 +127,7 @@ export default class Ship {
     }
 
     setPath(newPath) {
+        this.moving = true
         this.usePath = true
         this.location = null
         this.currentPath = newPath
@@ -111,30 +135,41 @@ export default class Ship {
         this.currentLocationIndex = 0
     }
 
-    update(currentGameTime) {
+    update(duration) { // in days
+        // let's move 100 px/day
+        if (!this.moving) {
+            return
+        }
+        const movement = duration * 100
+        const wholeMovement = Math.floor(movement)
+        const fractionalMovement = movement - wholeMovement
+        this.currentPathFraction += fractionalMovement
+        const completedFraction = Math.floor(this.currentPathFraction)
+        this.currentPathFraction -= completedFraction
+        const actualMovement = wholeMovement + completedFraction
+        let nextIndex = this.currentLocationIndex + actualMovement
+        if (nextIndex > this.currentPath.length) {
+            nextIndex = this.currentPath.length
+        }
         if (this.usePath) {
-            const currentPosition = this.currentPath[this.currentLocationIndex]
-            this.currentLocationIndex++
+            this.currentLocationIndex = nextIndex
             const nextPosition = this.currentPath[this.currentLocationIndex]
             if (!nextPosition) {
                 return this.reachedDestination()
             }
-            const currentPoint = new Point(currentPosition.x, currentPosition.y)
             const nextPoint = new Point(nextPosition.x, nextPosition.y)
-            const path = new Vector(currentPoint, nextPoint)
-            this.angle = referenceVector.angleTo(path) + degreesToRadians(90)
             this.position = nextPoint 
         }
-        if (this.currentDestination) {
-            const velocity = this.path.normalize().multiply(this.speed)
-            this.position = this.position.translate(velocity)
-            this.angle = referenceVector.angleTo(this.path) + degreesToRadians(90)
+        // if (this.currentDestination) {
+        //     const velocity = this.path.normalize().multiply(this.speed)
+        //     this.position = this.position.translate(velocity)
+        //     this.angle = referenceVector.angleTo(this.path) + degreesToRadians(90)
 
-            const destination = this.currentDestination
-            if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
-                this.reachedDestination()
-            }
-        }
+        //     const destination = this.currentDestination
+        //     if (Math.round(this.position.x) === Math.round(destination.position.x) && Math.round(this.position.y) === Math.round(destination.position.y)) {
+        //         this.reachedDestination()
+        //     }
+        // }
     }
 
     onReachedDestination(listener) {

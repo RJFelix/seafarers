@@ -23,36 +23,36 @@ import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 
-function SimpleMenu() {
-    const [anchorEl, setAnchorEl] = React.useState(null);
-  
-    const handleClick = event => {
-      setAnchorEl(event.currentTarget);
-    };
-  
-    const handleClose = () => {
-      setAnchorEl(null);
-    };
-  
-    return (
-      <div>
-        <Button aria-controls="simple-menu" aria-haspopup="true" onClick={handleClick}>
-          Menu
-        </Button>
-        <Menu
-          id="simple-menu"
-          anchorEl={anchorEl}
-          keepMounted
-          open={Boolean(anchorEl)}
-          onClose={handleClose}
-        >
-          <MenuItem onClick={handleClose}>Profile</MenuItem>
-          <MenuItem onClick={handleClose}>My account</MenuItem>
-          <MenuItem onClick={handleClose}>Logout</MenuItem>
-        </Menu>
-      </div>
-    );
-  }
+function SimpleMenu(props) {
+  const [anchorEl, setAnchorEl] = React.useState(null);
+
+  const handleClick = event => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+
+  return (
+    <div>
+      <Button aria-controls="ship-info" aria-haspopup="true" onClick={handleClick}>
+        Ship Info
+      </Button>
+      <Menu
+        id="ship-info"
+        anchorEl={anchorEl}
+        keepMounted
+        open={Boolean(anchorEl)}
+        onClose={handleClose}
+      >
+        <MenuItem onClick={handleClose}>{props.type.name}</MenuItem>
+        <MenuItem onClick={handleClose}>Larder</MenuItem>
+        <MenuItem onClick={handleClose}>Manifest</MenuItem>
+      </Menu>
+    </div>
+  );
+}
 
 function desc(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -79,13 +79,13 @@ function getSorting(order, orderBy) {
 }
 
 const headCells = [
-  { id: 'name', numeric: false, disablePadding: true, label: 'Item' },
-  { id: 'buyPrice', numeric: true, disablePadding: false, label: 'Price to Sell to Market' },
-  { id: 'sellPrice', numeric: true, disablePadding: false, label: 'Price to Buy from Market' },
-  { id: 'weight', numeric: true, disablePadding: false, label: 'Weight (kg)' },
-  { id: 'volume', numeric: true, disablePadding: false, label: 'Volume (m3)' },
-  { id: 'quantity', numeric: true, disablePadding: false, label: 'Quantity' },
-  { id: 'quality', numeric: true, disablePadding: false, label: 'Quality' },
+  { id: 'name', numeric: false, disablePadding: true, label: 'Ship Class' },
+  { id: 'masts', numeric: true, disablePadding: true, label: 'Masts' },
+  { id: 'sailsRequired', numeric: true, disablePadding: true, label: 'Sails' },
+  { id: 'hullSize', numeric: true, disablePadding: true, label: 'Hull Size' },
+  { id: 'gunPorts', numeric: true, disablePadding: true, label: 'Gun Ports' },
+  { id: 'speed', numeric: true, disablePadding: true, label: 'Speed' },
+  { id: 'unladenMass', numeric: true, disablePadding: true, label: 'Unladen Mass' }
 ];
 
 function EnhancedTableHead(props) {
@@ -109,7 +109,7 @@ function EnhancedTableHead(props) {
           <TableCell
             key={headCell.id}
             align={'left'}
-            padding={'none'}
+            padding={headCell.disablePadding ? 'none' : 'default'}
             sortDirection={orderBy === headCell.id ? order : false}
           >
             <TableSortLabel
@@ -147,7 +147,7 @@ const useToolbarStyles = makeStyles(theme => ({
     paddingRight: theme.spacing(1),
   },
   highlight:
-    theme.palette.type === 'dark'
+    theme.palette.type === 'light'
       ? {
           color: theme.palette.secondary.main,
           backgroundColor: lighten(theme.palette.secondary.light, 0.85),
@@ -177,17 +177,15 @@ const EnhancedTableToolbar = props => {
         </Typography>
       ) : (
         <Typography className={classes.title} variant="h6" id="tableTitle">
-          {props.locationName}
+          Your Ship!
         </Typography>
       )}
-
-        <SimpleMenu>
-
-        </SimpleMenu>
-
+      <SimpleMenu
+        type={props.type}>
+      </SimpleMenu>
       {numSelected > 0 ? (
-        <Tooltip title="Buy">
-          <IconButton aria-label="buy"
+        <Tooltip title="Sell">
+          <IconButton aria-label="sell"
             onClick={() => {
               props.buyItems()
             }}
@@ -217,9 +215,10 @@ const useStyles = makeStyles(theme => ({
   },
   paper: {
     width: '100%',
-    marginBottom: theme.spacing(2),
+    marginBottom: theme.spacing(1),
   },
   table: {
+    //minWidth: 750,
   },
   tableWrapper: {
     overflowX: 'auto',
@@ -245,7 +244,7 @@ export default function EnhancedTable(props) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
-  const rows = props.rows;
+  const rows = [props.type];
   const locationName = props.location ? props.location.name : 'At Sea?'
 
   const handleRequestSort = (event, property) => {
@@ -301,9 +300,8 @@ export default function EnhancedTable(props) {
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
 
   const onBuyItems = () => {
-      const selectedItems = rows.filter(row => isSelected(row.id))
+      const selectedItems = rows.filter(row => isSelected(row.name))
       props.onBuyItems(selectedItems)
-      setSelected([])
   }
 
   return (
@@ -312,7 +310,8 @@ export default function EnhancedTable(props) {
         <EnhancedTableToolbar 
             numSelected={selected.length} 
             locationName={locationName}
-            buyItems={onBuyItems} 
+            buyItems={onBuyItems}
+            type={props.type}
         />
         <div className={classes.tableWrapper}>
           <Table
@@ -334,17 +333,17 @@ export default function EnhancedTable(props) {
               {stableSort(rows, getSorting(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.id);
+                  const isItemSelected = isSelected(row.name);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={event => handleClick(event, row.id)}
+                      onClick={event => handleClick(event, row.name)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={row.name}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
@@ -356,19 +355,19 @@ export default function EnhancedTable(props) {
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
                       </TableCell>
-                      <TableCell align="left">{row.buyPrice}</TableCell>
-                      <TableCell align="left">{row.sellPrice}</TableCell>
-                      <TableCell align="left">{row.weight}</TableCell>
-                      <TableCell align="left">{row.volume}</TableCell>
-                      <TableCell align="left">{row.quantity}</TableCell>
-                      <TableCell align="left">{row.rarity}</TableCell>
-                      <TableCell align="left">{row.id}</TableCell>
+                      <TableCell align="left">{row.masts}</TableCell>
+                      <TableCell align="left">{row.sailsRequired}</TableCell>
+                      <TableCell align="left">{row.hullSize}</TableCell>
+                      <TableCell align="left">{row.gunPorts}</TableCell>
+                      <TableCell align="left">{row.speed}</TableCell>
+                      <TableCell align="left">{row.unladenMass}</TableCell>
+                      {/* <TableCell align="right">{row.inventories}</TableCell> */}
                     </TableRow>
                   );
                 })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 33 * emptyRows }}>
-                  <TableCell colSpan={6} />
+                  <TableCell colSpan={1} />
                 </TableRow>
               )}
             </TableBody>

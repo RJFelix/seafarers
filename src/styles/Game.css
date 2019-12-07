@@ -3,3 +3,10 @@ div.game {
   height: 100%;
   display: flex;
 }
+
+div.game-details {
+  width: 100%;
+  padding: 6px;
+  margin-bottom: 12px;
+  margin-top: 6px;
+}

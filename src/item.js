@@ -30,6 +30,7 @@ export const createItemFromProducer = (producer) => {
   item.volume *= producer.quantity
   item.value *= producer.quantity
   item.quantity = producer.quantity
+  item.itemTemplateIndex = producer.itemId
 
   return item
 }
@@ -98,6 +99,7 @@ export const createRandomItem = () => {
   const producerTemplate = producerTemplates[producerTemplateIndex]
   const randomProducer = createProducerFromTemplate(producerTemplate)
   const randomItem = createItemFromTemplate(itemTemplate, randomProducer)
+  randomItem.itemTemplateIndex = itemTemplateIndex
   return randomItem
 }
 
@@ -131,6 +133,7 @@ export const combineItems = (alreadyCombinedItem, newItem) => {
       rarity: newItem.rarity,
       quantity: alreadyCombinedItem.quantity + newItem.quantity,
       name: newItem.name,
+      itemTemplateIndex: newItem.itemTemplateIndex,
       madeBy
   }
   return item
