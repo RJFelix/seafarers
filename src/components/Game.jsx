@@ -1,12 +1,8 @@
 import React from 'react'
 
-import LocationInfo from './LocationInfo.jsx'
 import WorldMap from './WorldMap.jsx'
-import ShipInfo from './ShipInfo.jsx'
-import Market from './Market.jsx'
 import NewMarket from './NewMarket.jsx'
 import ShipTable from './ShipTable.jsx'
-import ShipList from './ShipList.jsx'
 import SidePanel from './SidePanel.jsx'
 import World from '../world.js'
 import Grid from '@material-ui/core/Grid'

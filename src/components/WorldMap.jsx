@@ -5,8 +5,6 @@ import Paper from '@material-ui/core/Paper'
 
 import { Stage, Layer, Line, Image as KonvaImage } from 'react-konva'
 
-import Location from './Location.jsx'
-import Ship from './Ship.jsx'
 import { path, pointAt, pathArray, setGrid, findPathAsync } from '../map-matrix'
 
 import worldMapPng from '../../assets/WorldMap.png'
