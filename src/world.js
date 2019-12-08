@@ -7,7 +7,7 @@ import { createRandomItem } from './item.js'
 import locationData from './location-data.js'
 import Location from './location.js'
 
-const GAME_SPEEDS = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50]
+const GAME_SPEEDS = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50]
 
 export default class World {
     constructor() {
@@ -49,16 +49,22 @@ export default class World {
             return
         }
         this.elapsedTime += duration
-        if (this.elapsedTime >= (1000 * 1 / this.gameSpeed)) {
+        if (this.gameSpeed > 0 && this.elapsedTime >= (1000 * 1 / this.gameSpeed)) {
             this.gameTime++
             this.elapsedTime = 0
             this.notifyOfTime()
+            this.updateGame(this.gameTime)
         }
         const fractionOfDay = duration * this.gameSpeed / 1000
         this.ship.update(fractionOfDay)
     }
     updateGame(currentGameTime) {
-        this.locations.forEach(location => location.priceMultiplierChanger())
+        this.locations.forEach(location => {
+            location.priceMultiplierChanger()
+            location.consumeItems()
+            location.market = location.addPrices(location.market)
+            location.refillMarket()            
+        })
     }
 
     updatePath(newPath) {

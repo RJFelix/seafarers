@@ -74,7 +74,7 @@ export default class Ship {
     sellCargo(item) {
         const index = this.cargo.findIndex((cargoItem) => cargoItem.id === item.id)
         if (index > -1) {
-            const payment = this.getPaymentFromValue(item.value)
+            const payment = this.getPaymentFromValue(item.buyPrice)
             this.cargo.splice(index, 1)
             this.addCargo(payment)
             this.addToManifest(item, 1)

@@ -127,6 +127,7 @@ export const combineItems = (alreadyCombinedItem, newItem) => {
   
   const item = {
       id: uuid(),
+      baseValue: newItem.baseValue,
       weight: alreadyCombinedItem.weight + newItem.weight,
       volume: alreadyCombinedItem.volume + newItem.volume,
       value: alreadyCombinedItem.value + newItem.value,

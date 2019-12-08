@@ -6,7 +6,7 @@ import uuid from 'uuid/v4'
 import { randomInt, normalDistribution, factorialize } from './utils.js'
 import demandTemplate from './demand-template.js'
 import itemTemplates from './item-templates.js'
-
+import producerTemplates from './producer-templates.js'
 //import { makeAMap } from './map-matrix.js'
 
 export default class Location {
@@ -19,8 +19,10 @@ export default class Location {
       this.producer = producer
       this.population = population
       this.onSelectListeners = []
-      this.buyPriceMultiplier = 99
-      this.sellPriceMultiplier = 101
+      this.buyPriceMultiplier = normalDistribution(80, 99, 1)
+      this.targetBuyPriceMultiplier = normalDistribution(80, 99, 1)
+      this.sellPriceMultiplier = normalDistribution(101, 120, 1)
+      this.targetSellPriceMultiplier = normalDistribution(101, 120, 1)
 
       this.onClick = this.onClick.bind(this)
   }
@@ -35,47 +37,68 @@ export default class Location {
       presentItems.add(item.name)
       const itemQuantity = item.quantity
       const itemDemandTemplate = demandTemplate[item.itemTemplateIndex]
-      const fractionOfDemand = itemQuantity / (itemDemandTemplate.demand * this.population)
+      const fractionOfDemand = itemQuantity / (itemDemandTemplate.demand)
       const demandValue = 3 * (Math.pow(0.5, fractionOfDemand))
-      const buyPriceMultiplier = normalDistribution(80, 99, 1)
-      const sellPriceMultiplier = normalDistribution(101, 120, 1)
+      const naturalPrice = item.value * demandValue
+      const minimumPrice = item.baseValue * factorialize(item.rarity) * item.quantity
+      const actualBuyPrice = Math.max(naturalPrice, minimumPrice) * this.buyPriceMultiplier/100
+      const actualSellPrice = Math.max(naturalPrice, minimumPrice) * this.sellPriceMultiplier/100
       return {
         ...item,
-        buyPrice: Math.round(item.value * demandValue * (buyPriceMultiplier/100)),
-        sellPrice: Math.round(item.value * demandValue * (sellPriceMultiplier/100))
+        buyPrice: Math.round(actualBuyPrice),
+        sellPrice: Math.round(actualSellPrice)
       }
     })
     return marketWithPrices
   }
 
-  priceMultiplierChanger(location) {
-    const buyPriceMultiplier = normalDistribution(80, 99, 1)
-    const sellPriceMultiplier = normalDistribution(101, 120, 1)
-
-    if (buyPriceMultiplier > location.buyPriceMultiplier){
-      location.buyPriceMultiplier = location.buyPriceMultiplier + (buyPriceMultiplier*(1/100)*(1/100))
+  priceMultiplierChanger() {
+    if (Math.round(this.targetBuyPriceMultiplier) === Math.round(this.buyPriceMultiplier)) {
+      this.targetBuyPriceMultiplier = normalDistribution(80, 99, 1)
     } else {
-      location.buyPriceMultiplier = location.buyPriceMultiplier - (buyPriceMultiplier*(1/100)*(1/100))
+      if (this.targetBuyPriceMultiplier > this.buyPriceMultiplier) {
+        this.buyPriceMultiplier += 0.1
+      } else {
+        this.buyPriceMultiplier -= 0.1
+      }
     }
-    
-    if (sellPriceMultiplier > location.sellPriceMultiplier){
-      location.sellPriceMultiplier = location.sellPriceMultiplier + (sellPriceMultiplier*(1/100)*(1/100))
+
+    if (Math.round(this.targetSellPriceMultiplier) === Math.round(this.sellPriceMultiplier)) {
+      this.targetSellPriceMultiplier = normalDistribution(101, 120, 1)
     } else {
-      location.sellPriceMultiplier = location.sellPriceMultiplier - (sellPriceMultiplier*(1/100)*(1/100))
+      if (this.targetSellPriceMultiplier > this.sellPriceMultiplier) {
+        this.sellPriceMultiplier += 0.1
+      } else {
+        this.sellPriceMultiplier -= 0.1
+      }
     }
   }
 
-  refillMarket() {
-    const roll = normalDistribution(1, 100, 1)
-    for (var i = roll; i>0; i-- ) {
-      if (this.producer) {
-        /* Before making this.producer an array */
-        // const newItems = new Array(5).fill(0).map(() => createItemFromProducer(this.producer))
+  consumeItems() {
+    this.market.forEach(item => {
+      const itemDemandTemplate = demandTemplate[item.itemTemplateIndex]
+        if (item.quantity >= 1) {
+          item.quantity -= Math.ceil(itemDemandTemplate.demand/100)
+        }
+      })
+      console.log(this.market[0] && this.market[0].quantity)
+  }
 
+  refillMarket() {
+      if (this.producer) {
+        this.market = this.market.map(item => {
+          if (item.quantity > demandTemplate[item.itemTemplateIndex].demand * 10) {
+            item.quantity = demandTemplate[item.itemTemplateIndex].demand * 10
+          }
+          return item
+        })
         const newItems = this.producer.map(n => createItemFromProducer(n))
         this.market = this.addPrices(groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems))
+        
+        
+        const nonProducedItems = producerTemplates.map(n => createItemFromProducer(n)).filter(() => Math.random() < 0.5)
+        this.market = this.addPrices(groupBy(this.market.concat(nonProducedItems), ["name", "rarity"], combineItems))
       }
-    }
   }
 
   regroupItems() {

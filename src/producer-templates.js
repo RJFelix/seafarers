@@ -4,7 +4,7 @@ export default [
     {
         name: 'Royal Mint of Spain',
         itemId: 0, //'Doubloon'
-        quantity: 1,
+        quantity: 500,
         skill: 5
     },
     {

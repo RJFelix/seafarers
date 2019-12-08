@@ -62,16 +62,18 @@ class Game extends React.Component {
   }
 
   onBuyItem(item) {
+    console.log('buying an item:')
+    console.log(item)
     const coverChargeObject = this.world.ship.cargo.find(element => element.name == "Doubloon")
-    if (item && coverChargeObject && (coverChargeObject.value >= item.value)) {
+    if (item && coverChargeObject && (coverChargeObject.value >= item.sellPrice)) {
       if (this.world.ship.addCargo(item)) {
         this.world.ship.location.buyItem(item)
         // Add Payment to the Market
-        this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(item.value))
+        this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(item.sellPrice))
         this.world.ship.location.regroupItems()
         // Remove Payment from the Ship
         const doubloonIndex = this.world.ship.cargo.findIndex(element => element.name == "Doubloon")
-        const newBalance = this.world.ship.cargo[doubloonIndex].value - item.value
+        const newBalance = this.world.ship.cargo[doubloonIndex].value - item.sellPrice
         this.world.ship.cargo.splice(doubloonIndex, 1)
         this.world.ship.cargo.push(this.world.ship.getPaymentFromValue(newBalance))
       } else {
@@ -102,13 +104,13 @@ class Game extends React.Component {
   onSellItem(item) {
     if (item) {
       const coverChargeObject = this.world.ship.location.market.find(element => element.name == "Doubloon")
-      if(coverChargeObject && coverChargeObject.value >= item.value) {
+      if(coverChargeObject && coverChargeObject.value >= item.buyPrice) {
         this.world.ship.sellCargo(item)
         // Put the sold item into the market inventory.
         this.world.ship.location.market.push(item)
         // Remove Payment from the Market
         const doubloonIndex = this.world.ship.location.market.findIndex(element => element.name == "Doubloon")
-        const newBalance = this.world.ship.location.market[doubloonIndex].value - item.value
+        const newBalance = this.world.ship.location.market[doubloonIndex].value - item.buyPrice
         this.world.ship.location.market.splice(doubloonIndex, 1)
         this.world.ship.location.market.push(this.world.ship.getPaymentFromValue(newBalance))
         this.world.ship.location.regroupItems()
@@ -209,7 +211,7 @@ class Game extends React.Component {
       if (this.world.ship.location) {
         const shipCargo = this.world.ship.cargo
         const shipCargoWithPrices = shipCargo.map(item => {
-          marketItem = this.world.ship.location.market.find(it => it.name === item.name && it.rarity === item.rarity)
+          const marketItem = this.world.ship.location.market.find(it => it.name === item.name && it.rarity === item.rarity)
           if (marketItem) {
             return {
               ...item,

@@ -80,7 +80,6 @@ function getSorting(order, orderBy) {
 
 const headCells = [
   { id: 'name', numeric: false, disablePadding: true, label: 'Item' },
-  { id: 'buyPrice', numeric: true, disablePadding: false, label: 'Price to Sell to Market' },
   { id: 'sellPrice', numeric: true, disablePadding: false, label: 'Price to Buy from Market' },
   { id: 'weight', numeric: true, disablePadding: false, label: 'Weight (kg)' },
   { id: 'volume', numeric: true, disablePadding: false, label: 'Volume (m3)' },
@@ -356,13 +355,11 @@ export default function EnhancedTable(props) {
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
                       </TableCell>
-                      <TableCell align="left">{row.buyPrice}</TableCell>
                       <TableCell align="left">{row.sellPrice}</TableCell>
                       <TableCell align="left">{row.weight}</TableCell>
                       <TableCell align="left">{row.volume}</TableCell>
                       <TableCell align="left">{row.quantity}</TableCell>
                       <TableCell align="left">{row.rarity}</TableCell>
-                      <TableCell align="left">{row.id}</TableCell>
                     </TableRow>
                   );
                 })}
