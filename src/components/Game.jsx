@@ -275,7 +275,7 @@ class Game extends React.Component {
                 
               {this.state.marketOpen &&
                 <NewMarket
-                  rows={this.world.ship.location ? this.world.ship.location.market : []}
+                  rows={this.world.ship.location ? this.world.ship.location.market.filter(item => item.quantity > 0) : []}
                   location={this.world.ship.location}
                   onExit={this.onMarketExit}
                   onBuyItems={this.onBuyItems}

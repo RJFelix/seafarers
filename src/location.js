@@ -77,28 +77,32 @@ export default class Location {
   consumeItems() {
     this.market.forEach(item => {
       const itemDemandTemplate = demandTemplate[item.itemTemplateIndex]
-        if (item.quantity >= 1) {
+        if ((item.quantity >= 1)) {
           item.quantity -= Math.ceil(itemDemandTemplate.demand/100)
         }
-      })
-      console.log(this.market[0] && this.market[0].quantity)
+    })
+      //console.log(this.market[0] && this.market[0].quantity)
+      
   }
 
   refillMarket() {
-      if (this.producer) {
-        this.market = this.market.map(item => {
-          if (item.quantity > demandTemplate[item.itemTemplateIndex].demand * 10) {
-            item.quantity = demandTemplate[item.itemTemplateIndex].demand * 10
-          }
-          return item
-        })
-        const newItems = this.producer.map(n => createItemFromProducer(n))
-        this.market = this.addPrices(groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems))
-        
-        
-        const nonProducedItems = producerTemplates.map(n => createItemFromProducer(n)).filter(() => Math.random() < 0.5)
-        this.market = this.addPrices(groupBy(this.market.concat(nonProducedItems), ["name", "rarity"], combineItems))
-      }
+    if (this.producer) {
+      const itemsOverLimit = this.market.filter(item => {
+        return item.quantity > demandTemplate[item.itemTemplateIndex].demand * 10
+      })
+      const newItems = this.producer.filter(producer => {
+        const overLimit = itemsOverLimit.find(item => item.itemTemplateIndex === producer.itemId)
+        return !overLimit
+      }).map(n => createItemFromProducer(n))
+      this.market = this.addPrices(groupBy(this.market.concat(newItems), ["name", "rarity"], combineItems))
+
+
+      const nonProducedItems = producerTemplates.filter(producer => {
+        const overLimit = itemsOverLimit.find(item => item.itemTemplateIndex === producer.itemId)
+        return !overLimit
+      }).map(n => createItemFromProducer(n)).filter(() => Math.random() < 0.5)
+      this.market = this.addPrices(groupBy(this.market.concat(nonProducedItems), ["name", "rarity"], combineItems))
+    }
   }
 
   regroupItems() {

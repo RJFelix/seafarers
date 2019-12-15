@@ -7,6 +7,8 @@ import { createRandomItem } from './item.js'
 import locationData from './location-data.js'
 import Location from './location.js'
 
+import Market from './new-inventory/market.js'
+
 const GAME_SPEEDS = [0, 0.25, 0.5, 0.75, 1, 1.25, 1.5, 2, 3, 5, 7, 10, 15, 20, 25, 30, 40, 50]
 
 export default class World {
@@ -24,6 +26,10 @@ export default class World {
             location.selected(() => {
                 this.ship.setDestination(location)
             })
+        })
+
+        this.newMarkets = this.locations.map(location => {
+            return new Market(location.name.toLowerCase())
         })
 
         window.addEventListener('keypress', evt => {
@@ -65,6 +71,11 @@ export default class World {
             location.market = location.addPrices(location.market)
             location.refillMarket()            
         })
+
+        this.newMarkets.forEach(market => {
+            market.updateGame()
+        })
+
     }
 
     updatePath(newPath) {

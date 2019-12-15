@@ -356,8 +356,8 @@ export default function EnhancedTable(props) {
                         {row.name}
                       </TableCell>
                       <TableCell align="left">{row.sellPrice}</TableCell>
-                      <TableCell align="left">{row.weight}</TableCell>
-                      <TableCell align="left">{row.volume}</TableCell>
+                      <TableCell align="left">{Math.round(row.weight)}</TableCell>
+                      <TableCell align="left">{Math.round(row.volume)}</TableCell>
                       <TableCell align="left">{row.quantity}</TableCell>
                       <TableCell align="left">{row.rarity}</TableCell>
                     </TableRow>

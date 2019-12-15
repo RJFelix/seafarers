@@ -165,7 +165,7 @@ function EnhancedTableHead(props) {
         </TableCell>
         {props.headCells.map(headCell => (
           <TableCell
-            key={headCell.id}
+            key={Math.round(headCell.id)}
             align={'left'}
             padding={'none'}
             sortDirection={orderBy === headCell.id ? order : false}

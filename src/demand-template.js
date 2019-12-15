@@ -3,7 +3,7 @@ import itemTemplates from './item-templates.js'
 export default [
     {
         itemID: itemTemplates[0], //Doubloon
-        demand: 0,
+        demand: 500,
     },
     {
         itemID: itemTemplates[1], //Cannonball
