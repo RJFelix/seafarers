@@ -3,8 +3,11 @@ import MARKETS from '../data/markets.js'
 import Inventory from './inventory.js'
 import { randomInt, normalDistribution, factorialize } from '../utils.js'
 
+let numberOfMarkets = 0
+
 export default class Market {
   constructor(locationName) {
+    console.log(`Constructing market number ${++numberOfMarkets}`)
     this.locationName = locationName
     this.itemData = {}
     this.inventory = new Inventory()
@@ -25,6 +28,16 @@ export default class Market {
         this.itemData[itemKey].types[typeKey] = typeData
         this.itemData[itemKey].types[typeKey].buyPrice = 1
         this.itemData[itemKey].types[typeKey].sellPrice = 1
+
+        const _itemData = this.itemData[itemKey].types[typeKey]
+        this.itemData[itemKey].types[typeKey] = new Proxy(_itemData, {
+          set(obj, prop, value) {
+            if (prop === 'sellPrice' && locationName === 'naples' && typeKey === 'coarse') {
+              console.trace(`Setting ${itemKey}/${typeKey} in Naples sellPrice to ${value}`)
+            }
+            return Reflect.set(...arguments)
+          }
+        })
       }
     }
 
@@ -36,6 +49,15 @@ export default class Market {
     this._updatePriceMultipliers()
     this._consumeItems()
     this._produceItems()
+  }
+
+  getItems() {
+    const inventoryData = this.inventory.getItemData()
+    inventoryData.forEach(inventoryItem => {
+      inventoryItem.buyPrice = this.itemData[inventoryItem.itemKey].types[inventoryItem.typeKey].buyPrice
+      inventoryItem.sellPrice = this.itemData[inventoryItem.itemKey].types[inventoryItem.typeKey].sellPrice
+    })
+    return inventoryData
   }
 
   buyItemFrom(itemName, type, quantity) {
@@ -52,27 +74,28 @@ export default class Market {
     return totalSellPrice
   }
 
-  totalPriceToBuyItem(itemName, type, quantity) {
+  totalPriceToBuyItem(itemName, typeName, targetQuantity) {
     let totalPrice = 0
-    let inventoryQuantity = this.itemData[itemName].types[typeName]
-    for(let i = 0; i < quantity; i++) {
-      const itemData = ITEMS[itemName].types[typeName]
+    let inventoryQuantity = this.inventory.getItemWithType(itemName, typeName)
+    const itemData = ITEMS[itemName]
+    const typeData = itemData.types[typeName]
+    for(let i = 0; i < targetQuantity; i++) {
       const quantity = inventoryQuantity
-      const demand = this.itemData[itemName].demand
+      const demand = itemData.demand
       const fractionOfDemand = quantity / demand
       const demandValue = 3 * Math.pow(0.5, fractionOfDemand)
       const naturalPrice = itemData.baseValue * demandValue
-      const minimumPrice = itemData.baseValue * factorialize(itemData.rarity)
+      const minimumPrice = itemData.baseValue * factorialize(typeData.rarity)
       totalPrice += Math.max(naturalPrice, minimumPrice) * this.sellPriceMultiplier / 100
       inventoryQuantity--
     }
     return totalPrice
   }
 
-  totalPriceToSellItem(itemName, typeName, quantity) {
+  totalPriceToSellItem(itemName, typeName, targetQuantity) {
     let totalPrice = 0
     let inventoryQuantity = this.itemData[itemName].types[typeName]
-    for(let i = 0; i < quantity; i++) {
+    for(let i = 0; i < targetQuantity; i++) {
       const itemData = ITEMS[itemName].types[typeName]
       const quantity = inventoryQuantity
       const demand = this.itemData[itemName].demand
@@ -93,7 +116,7 @@ export default class Market {
         const type = item.types[typeName]
         const itemData = ITEMS[itemName]
         const quantity = this.inventory.getItemWithType(itemName, typeName)
-        const demand = item.demand
+        const demand = itemData.demand
         const fractionOfDemand = quantity / demand
         const demandValue = 3 * Math.pow(0.5, fractionOfDemand)
         const naturalPrice = itemData.baseValue * demandValue
@@ -136,7 +159,6 @@ export default class Market {
       for (let typeName in item.types) {
         const type = item.types[typeName]
         const typeConsumption = actualDemand * (1 / Math.pow(1.1, type.rarity))
-        console.log(`Consuming ${typeConsumption} of ${type.name} with rarity ${type.rarity} from ${this.locationName}`)
         this.inventory.removeItems(itemName, typeName, typeConsumption)
       }
     }
@@ -151,7 +173,6 @@ export default class Market {
         const type = this.itemData[product.item].types[typeName]
         const roll = normalDistribution(1, 100, 1)
         const skillCoefficient = product.skill * roll / 50
-        console.log(`Adding ${Math.round(skillCoefficient * product.quantity / type.rarity)} of ${type.name} with skill ${product.skill} in ${this.locationName}`)
         this.inventory.addItems(product.item, typeName, Math.round(skillCoefficient * product.quantity / type.rarity))
       }
     })

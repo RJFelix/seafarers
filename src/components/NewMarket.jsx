@@ -22,6 +22,7 @@ import FilterListIcon from '@material-ui/icons/FilterList';
 import Button from '@material-ui/core/Button';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
+import TextField from '@material-ui/core/TextField';
 
 function SimpleMenu() {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -84,7 +85,7 @@ const headCells = [
   { id: 'weight', numeric: true, disablePadding: false, label: 'Weight (kg)' },
   { id: 'volume', numeric: true, disablePadding: false, label: 'Volume (m3)' },
   { id: 'quantity', numeric: true, disablePadding: false, label: 'Quantity' },
-  { id: 'quality', numeric: true, disablePadding: false, label: 'Quality' },
+  { id: 'quality', numeric: true, disablePadding: false, label: 'Rarity' },
 ];
 
 function EnhancedTableHead(props) {
@@ -244,8 +245,11 @@ export default function EnhancedTable(props) {
   const [page, setPage] = React.useState(0);
   const [dense, setDense] = React.useState(false);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [, updateState] = React.useState()
+  const forceUpdate = React.useCallback(() => updateState({}), [])
   const rows = props.rows;
   const locationName = props.location ? props.location.name : 'At Sea?'
+  const market = props.market
 
   const handleRequestSort = (event, property) => {
     const isDesc = orderBy === property && order === 'desc';
@@ -305,6 +309,22 @@ export default function EnhancedTable(props) {
       setSelected([])
   }
 
+  const onBuyItem_new = row => {
+    props.onBuyItem_new({
+      itemId: row.id
+    })
+  }
+
+  const handleBuyQuantityChanged_new = (event, item) => {
+    // props.onBuyQuantityChanged_new({
+    //   itemId: item.id,
+    //   quantity: event.target.value 
+    // })
+    const totalAmount = market.totalPriceToBuyItem(item.itemKey, item.typeKey, parseInt(event.target.value, 10))
+    item._totalBuyAmount = totalAmount
+    forceUpdate()
+  }
+
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
@@ -343,21 +363,28 @@ export default function EnhancedTable(props) {
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.id}
+                      key={`${row.itemKey}--${row.typeKey}`}
                       selected={isItemSelected}
                     >
                       <TableCell padding="checkbox">
-                        <Checkbox
+                        {/* <Checkbox
                           checked={isItemSelected}
                           inputProps={{ 'aria-labelledby': labelId }}
+                        /> */}
+                        <TextField 
+                          type="number" 
+                          label="Number To Buy" 
+                          defaultValue="0" 
+                          onChange={event => handleBuyQuantityChanged_new(event, row)} 
                         />
+                        <Button onClick={event => onBuyItem_new(row)}>{row._totalBuyAmount ? `Buy for ${row._totalBuyAmount}` : `Buy 1 for ${Math.round(row.sellPrice)}`}</Button>
                       </TableCell>
                       <TableCell component="th" id={labelId} scope="row" padding="none">
                         {row.name}
                       </TableCell>
                       <TableCell align="left">{row.sellPrice}</TableCell>
-                      <TableCell align="left">{Math.round(row.weight)}</TableCell>
-                      <TableCell align="left">{Math.round(row.volume)}</TableCell>
+                      <TableCell align="left">{Math.round(row.weight * row.quantity)}</TableCell>
+                      <TableCell align="left">{Math.round(row.volume * row.quantity)}</TableCell>
                       <TableCell align="left">{row.quantity}</TableCell>
                       <TableCell align="left">{row.rarity}</TableCell>
                     </TableRow>

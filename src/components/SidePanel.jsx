@@ -2,7 +2,7 @@ import React from 'react'
 import Grid from '@material-ui/core/Grid'
 
 export default function SidePanel (props) {
-    const children = props.children
+    const children = props.children.filter(child => child)
     return (
         <Grid
             container item
@@ -16,10 +16,11 @@ export default function SidePanel (props) {
                 paddingLeft: '24px'
             }}
         >
-            {props.children.map(child => {
+            {children.map(child => {
                 return (
                     <Grid item style={{
-                        width: '100%'
+                        width: '100%',
+                        key: child.key
                     }}> 
                         {child}
                     </Grid>

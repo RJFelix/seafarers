@@ -3,7 +3,6 @@ import { Point, Vector, Line, Segment } from '@flatten-js/core'
 
 import Ship from './ship.js'
 import producers from './producer-templates.js'
-import { createRandomItem } from './item.js'
 import locationData from './location-data.js'
 import Location from './location.js'
 
@@ -15,6 +14,7 @@ export default class World {
     constructor() {
         this.gameTime = 0
         this.gameSpeed = 1
+        this.priorGameSpeed = 1
         this.currentSpeedIndex = 3
         this.elapsedTime = 0
         this.timeListeners = []
@@ -22,8 +22,10 @@ export default class World {
         this.locations = locationData
         this.ship = new Ship({ x: 0, y: 0 })
         this.ship.createShipType(0)
+        this.ship.onReachedDestination(() => this.onShipReachedDestination())
         this.locations.forEach(location => {
             location.selected(() => {
+                this.gameSpeed = this.priorGameSpeed
                 this.ship.setDestination(location)
             })
         })
@@ -38,18 +40,36 @@ export default class World {
                     return
                 }
                 this.currentSpeedIndex++
-                this.gameSpeed = GAME_SPEEDS[this.currentSpeedIndex]
+                this.priorGameSpeed = GAME_SPEEDS[this.currentSpeedIndex]
+                this.gameSpeed = this.gameSpeed && this.priorGameSpeed // same as "if this.gameSpeed > 0 then priorGameSpeed else 0"
                 this.notifyOfTime()
             } else if (evt.key === '-') {
                 if (this.currentSpeedIndex === 0) {
                     return
                 }
                 this.currentSpeedIndex--
-                this.gameSpeed = GAME_SPEEDS[this.currentSpeedIndex]
+                this.priorGameSpeed = GAME_SPEEDS[this.currentSpeedIndex]
+                this.gameSpeed = this.gameSpeed && this.priorGameSpeed // same as "if this.gameSpeed > 0 then priorGameSpeed else 0"
+                this.notifyOfTime()
+            } else if (evt.key === ' ') {
+                evt.preventDefault()
+                evt.stopPropagation()
+                this.gameTime++
+                this.updateGame(this.gameTime)
                 this.notifyOfTime()
             }
         })
     }
+
+    getMarketForLocation(location) {
+        return this.newMarkets.find(market => market.locationName === location.name.toLowerCase())
+    }
+
+    onShipReachedDestination() {
+        this.priorGameSpeed = this.gameSpeed
+        this.gameSpeed = 0
+    }
+
     update(duration) {
         if (!duration) {
             return

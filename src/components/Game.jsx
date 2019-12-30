@@ -32,6 +32,9 @@ class Game extends React.Component {
     this.onMarketExit = this.onMarketExit.bind(this)
     this.onNewPath = this.onNewPath.bind(this)
 
+    this.onBuyItem_new = this.onBuyItem_new.bind(this)
+    this.onBuyQuantityChanged_new = this.onBuyQuantityChanged_new.bind(this)
+
     this.world.ship.onReachedDestination(this.onShipReachedDestination)
   }
 
@@ -87,6 +90,16 @@ class Game extends React.Component {
       }
     }
     this.forceUpdate()
+  }
+
+  onBuyItem_new({ itemId }) {
+
+  }
+
+  onBuyQuantityChanged_new({ itemId, quantity }) {
+    // remove <quantity> items from market and update value
+    // make sure to keep track of <quantity> so we can re-add them when we leave
+    // or commit when we buy the items
   }
 
   onBuyItems(items) {
@@ -264,21 +277,26 @@ class Game extends React.Component {
           /> */}
           <Grid item xs={6}>
             <SidePanel>
-              <Paper className='game-details'>
+              <Paper className='game-details' key='game-details'>
                 <h3>Time: {this.state.gameTime} days; Speed: {this.state.gameSpeed} days/sec</h3>
               </Paper>
               <ShipTable
                 compartments={compartments}
                 onBuyItems={this.onSellItems}
                 type={this.world.ship.type}
+                key='ship-table'
               />
                 
               {this.state.marketOpen &&
                 <NewMarket
-                  rows={this.world.ship.location ? this.world.ship.location.market.filter(item => item.quantity > 0) : []}
+                  rows={this.world.ship.location ? this.world.getMarketForLocation(this.world.ship.location).getItems() /* ship.location.market.filter(item => item.quantity > 0) */ : []}
                   location={this.world.ship.location}
+                  market={this.world.ship.location && this.world.getMarketForLocation(this.world.ship.location)}
                   onExit={this.onMarketExit}
                   onBuyItems={this.onBuyItems}
+                  onBuyItem_new={this.onBuyItem_new}
+                  onBuyQuantityChanged_new={this.onBuyQuantityChanged_new}
+                  key='market-table'
                 />
               }
             </SidePanel>

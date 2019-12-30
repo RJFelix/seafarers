@@ -1,13 +1,13 @@
-import items from '../data/items.js'
+import ITEMS from '../data/items.js'
 
 export default class Inventory {
   constructor() {
     // Map of itemId -> type -> quantity
     this.items = {}
 
-    Object.keys(items).forEach(key => {
+    Object.keys(ITEMS).forEach(key => {
       this.items[key] = {}
-      Object.keys(items[key].types).forEach(typeKey => {
+      Object.keys(ITEMS[key].types).forEach(typeKey => {
         this.items[key][typeKey] = 0
       })
     })
@@ -25,6 +25,28 @@ export default class Inventory {
 
   getItemWithType(name, type) {
     return this.items[name][type]
+  }
+
+  getItemData() {
+    const itemData = []
+    for (const itemKey in this.items) {
+      for (const typeKey in this.items[itemKey]) {
+        if (this.items[itemKey][typeKey] > 0) {
+          const thisItem = {
+            itemKey,
+            typeKey,
+            name: ITEMS[itemKey].types[typeKey].name,
+            quantity: this.items[itemKey][typeKey],
+            rarity: ITEMS[itemKey].types[typeKey].rarity,
+            weight: ITEMS[itemKey].weight,
+            volume: ITEMS[itemKey].volume
+          }
+          itemData.push(thisItem)
+        }
+      }
+    }
+
+    return itemData
   }
 
   // Step over each item, receiving items in the format { name: String, quantity: Number }

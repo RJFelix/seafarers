@@ -49,7 +49,7 @@ export default {
     produces: [
       {
         item: "crateOfTea",
-        quantity: 2,
+        quantity: 20,
         skill: 8
       },
       {

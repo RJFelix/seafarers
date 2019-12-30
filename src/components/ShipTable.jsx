@@ -41,7 +41,7 @@ const columnsFor = (compartment) => {
         buyPrice: 'Price to Sell to Market',
         weight: 'Weight (kg)',
         volume: 'Volume (m3)',
-        quality: 'Quality',
+        quality: 'Rarity',
         quantity: 'Quantity'
       }
     case 'larder':
@@ -165,7 +165,7 @@ function EnhancedTableHead(props) {
         </TableCell>
         {props.headCells.map(headCell => (
           <TableCell
-            key={Math.round(headCell.id)}
+            key={headCell.id}
             align={'left'}
             padding={'none'}
             sortDirection={orderBy === headCell.id ? order : false}

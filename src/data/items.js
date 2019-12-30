@@ -17,7 +17,7 @@ export default {
     "weight": 5.4,
     "volume": 0.000731,
     "baseValue": 3,
-    demand: 100,
+    demand: 1,
     types: {
       cannonball: {
         name: "Cannonball",
@@ -30,7 +30,7 @@ export default {
     "weight": 300,
     "volume": 1,
     "baseValue": 12,
-    demand: 10,
+    demand: 0.1,
     types: {
       coarse: {
         name: "Crate of Coarse Linen",
@@ -59,7 +59,7 @@ export default {
     "weight": 50,
     "volume": 1,
     "baseValue": 6,
-    demand: 10,
+    demand: 0.1,
     types: {
       dust: {
         name: "Crate of Tea Dust",
@@ -84,7 +84,7 @@ export default {
     "weight": 27.2155,
     "volume": 0.036369,
     "baseValue": 2,
-    demand: 10,
+    demand: 0.1,
     types: {
       bushelOfWheat: {
         name: "Bushel of Wheat",
